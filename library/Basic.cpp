@@ -60,6 +60,8 @@ DataTypeEnum getDataTypeEnum(const char *dataTypeString) {
     return DataTypeEnum::Ptrdiff_t;
   else if (strcmp(dataTypeString, "size_t") == 0)
     return DataTypeEnum::Size_t;
+  else if (strcmp(dataTypeString, "void") == 0)
+    return DataTypeEnum::Void;
   else
     std::cerr << "Unhandled type: " << dataTypeString << std::endl;
   assert(false && "Unhandled type");

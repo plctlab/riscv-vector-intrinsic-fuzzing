@@ -26,6 +26,7 @@ enum TypeClass {
   : (TC) == UNSIGNED_INT ? "uint"                                              \
   : (TC) == FLOAT        ? "float"                                             \
   : (TC) == BOOL         ? "bool"                                              \
+  : (TC) == VOID         ? "void"                                              \
                  : (assert("Unknown type class!?"), "<SOME_THING_WRONG>")
 
 #define TYPE_CLASS_SHORT_STR(TC)                                               \
