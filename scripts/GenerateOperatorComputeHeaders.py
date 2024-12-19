@@ -52,7 +52,14 @@ def parseCustomOperatorDefinitions(filename) :
       else :
         code_gen_func = create_vx_op
     elif "Miscellaneous" in op_attr :
-      code_gen_func = create_temp_op
+      if op_id == "vcreate" :
+        code_gen_func = create_create_op
+      elif op_id == "vget" :
+        code_gen_func = create_get_op
+      elif op_id == "vreinterpret" :
+        code_gen_func = create_reinterpret_op
+      else:
+        code_gen_func = create_temp_op 
     elif "SegLoadOperation" in op_attr or "SegStoreOperation" in op_attr:
       if "MaskedOperation" in op_attr:
         code_gen_func = create_seg_load_mask_op
