@@ -140,6 +140,9 @@ enum OperatorAttr : OperatorAttrT {
   MaskUndisturbed = 1 << 19,
   FRM = 1 << 20,
   VXRM = 1 << 21,
+  Miscellaneous = 1 << 22,
+  SegStoreOperation = 1 << 23,
+  SegLoadOperation = 1 << 24,
 };
 
 struct OperatorBase : ValueBase {
@@ -231,6 +234,9 @@ bool isWideningOperator(OperatorBase *op);
 bool isNarrowingOperator(OperatorBase *op);
 bool isWideningValue(ValueBase *x, ValueBase *y);  // is X Widen of Y
 bool isNarrowingValue(ValueBase *x, ValueBase *y); // is X Narrow of Y
+bool isSegStoreOperation(OperatorBase *op);
+bool isSegLoadOperation(OperatorBase *op);
+bool isMiscellaneous(OperatorBase *op);
 
 // Getters for input/output of an Operator
 ValueBase *getVd(OperatorBase *op);

@@ -99,6 +99,18 @@ bool isFRM(OperatorBase *op) { return op->opAttr & FRM; }
 
 bool isVXRM(OperatorBase *op) { return op->opAttr & VXRM; }
 
+bool isSegLoadOperation(OperatorBase *op) {
+  return op->opAttr & SegLoadOperation;
+}
+
+bool isSegStoreOperation(OperatorBase *op) {
+  return op->opAttr & SegStoreOperation;
+}
+
+bool isMiscellaneous(OperatorBase *op) {
+  return op->opAttr & Miscellaneous;
+}
+
 bool hasMask(const OperatorBase *op) { return op->opAttr & MaskedOperation; }
 
 bool hasNonmask(const OperatorBase *op) {
