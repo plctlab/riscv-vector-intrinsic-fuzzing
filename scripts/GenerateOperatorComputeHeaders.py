@@ -39,7 +39,11 @@ def parseCustomOperatorDefinitions(filename) :
     op_id = opdef_info.op_id
     op_type = opdef_info.op_type
     op_attr = opdef_info.op_attr
-
+    output_type = opdef_info.output_type
+    input_num = opdef_info.input_num
+    input_nfield = opdef_info.input_nfield
+    output_nfield = opdef_info.output_nfield
+    input_types = opdef_info.input_types
     if op_id[-2:] == "vx" or op_id[-2:] == "wx" or op_id[-2:] == "vf" or op_id[-2:] == "wf":
       if "MulAddOperation" in op_attr :
         code_gen_func = create_destructive_vx_op
@@ -50,7 +54,10 @@ def parseCustomOperatorDefinitions(filename) :
     elif "Miscellaneous" in op_attr :
       code_gen_func = create_temp_op
     elif "SegLoadOperation" in op_attr or "SegStoreOperation" in op_attr:
-      code_gen_func = create_temp2_op
+      if "MaskedOperation" in op_attr:
+        code_gen_func = create_seg_load_mask_op
+      elif "NonmaskedOperation" in op_attr :
+        code_gen_func = create_seg_load_no_mask_op
     elif op_id[-2:] == "vv" or op_id[-2:] == "wv" or op_id[-2:] == "mm":
       if "MulAddOperation" in op_attr :
         code_gen_func = create_destructive_vv_op
@@ -106,9 +113,14 @@ def parseCustomOperatorDefinitions(filename) :
     else :
       raise Exception("unrecognized id %s of type %s" % (op_id, op_type))
 
-    code = code_gen_func(opdef_info.op_type, opdef_info.op_id, opdef_info.op_attr,
+    code = code_gen_func(opdef_info.op_type,
+                         opdef_info.op_id, 
+                         opdef_info.op_attr,
                          opdef_info.output_type,
-                         opdef_info.input_num, opdef_info.input_types)
+                         opdef_info.input_num,
+                         opdef_info.input_nfield,
+                         opdef_info.output_nfield,
+                         opdef_info.input_types)
 
     if len(code) == 0 :
       continue

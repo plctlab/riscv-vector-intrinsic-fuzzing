@@ -80,7 +80,7 @@ vxm_ta_literal_end = '''
 '''
 
 
-def create_vxm_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_vxm_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vxm_literal_start0 + op_type + vxm_literal_start1
   for i in range(input_num) :

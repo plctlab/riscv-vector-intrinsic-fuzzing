@@ -781,7 +781,7 @@ vx_mu_literal_masked_no_masked_off_end = '''
 def include_literal(filename):
     return "#include\"" + filename + "\""
 
-def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vx_literal_start0 + op_type + vx_literal_start1
   for i in range(input_num) :
@@ -817,7 +817,7 @@ def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
       ret += vx_literal_nonmask_body + include_literal("v" + op_id + ".h") + vx_literal_nonmask_end
   return ret
 
-def create_destructive_vx_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_destructive_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vx_literal_start0 + op_type + vx_literal_start1
   for i in range(input_num) :
@@ -853,7 +853,7 @@ def create_destructive_vx_op(op_type, op_id, op_attr, output_type, input_num, in
       ret += vx_literal_nonmask_destructive_body + include_literal("v" + op_id + ".h") + vx_literal_nonmask_destructive_end
   return ret
 
-def create_masked_no_maskedoff_vx_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_masked_no_maskedoff_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vx_literal_start0 + op_type + vx_literal_start1
   for i in range(input_num) :

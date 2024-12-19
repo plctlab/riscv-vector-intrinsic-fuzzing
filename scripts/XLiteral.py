@@ -184,7 +184,7 @@ x_tumu_literal_mask_end = '''
 }
 '''
 
-def create_x_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_x_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += x_literal_start0 + op_type + x_literal_start1
   for i in range(input_num) :

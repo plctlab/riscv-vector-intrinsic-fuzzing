@@ -666,7 +666,7 @@ vv_tumu_literal_mask_end = '''
 }
 '''
 
-def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vv_literal_start0 + op_type + vv_literal_start1
   for i in range(input_num) :
@@ -704,7 +704,7 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
       ret += vv_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_end
   return ret
 
-def create_destructive_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_destructive_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vv_literal_start0 + op_type + vv_literal_start1
   for i in range(input_num) :
@@ -736,7 +736,7 @@ def create_destructive_vv_op(op_type, op_id, op_attr, output_type, input_num, in
       ret += vv_literal_nonmask_destructive_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_destructive_end
   return ret
 
-def create_masked_no_maskedoff_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_masked_no_maskedoff_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vv_literal_start0 + op_type + vv_literal_start1
   for i in range(input_num) :
