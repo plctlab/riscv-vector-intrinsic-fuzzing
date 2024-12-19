@@ -17,6 +17,7 @@ enum TypeClass {
   UNSIGNED_INT,
   FLOAT,
   BOOL,
+  VOID,
   NumberOfTypeClasses,
 };
 
