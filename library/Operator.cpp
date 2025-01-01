@@ -943,6 +943,7 @@ struct CodeGenForViota : CodeGenForOperator {
         os << args[0] << ", ";
     } else {
       auto vecM = args[0];
+      // todo: remove TAMA and MO
       auto vecMO = hasTAMA(op) ? "" : args[1];
       os << vecM << ", ";
       if (vecMO != "") {

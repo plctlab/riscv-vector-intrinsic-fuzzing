@@ -87,6 +87,7 @@ struct CodeGenForOperator {
   std::vector<ValuePair> opInputs;
   ValuePair opOutput;
   void getRawPointers(std::vector<ValueBase *> inputs, ValueBase *output);
+  void getTupleRawPointers(std::vectore<std::vector<ValueBase *>> tuple_inputs);
 
   // With the pointers of the raw pointers, we will need to use vle or vmv to
   // load raw data into rvv data type. This is done inside this function.

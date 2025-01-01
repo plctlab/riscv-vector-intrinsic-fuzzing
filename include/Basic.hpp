@@ -111,6 +111,7 @@ struct ValueBase {
   int output_nfield;
 
   std::vector<ValueBase *> inputs;
+  std::vector<std::vector<ValueBase *>> tuple_inputs; //todo:
   std::vector<ValueBase *> outputs;
 
   int length;
