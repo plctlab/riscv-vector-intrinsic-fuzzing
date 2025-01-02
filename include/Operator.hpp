@@ -82,6 +82,7 @@ struct CodeGenForOperator {
   OperatorBase *op;
   TypeInfo vlTypeInfo;
   size_t loopLength;
+  
   // Loads raw data into pointer placeholders. The names of generated
   // placeholders are stored in `opInputs` and opOutput.
   std::vector<ValuePair> opInputs;

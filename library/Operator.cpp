@@ -568,7 +568,7 @@ static void storeVectorToScalar(std::ostream &os, const std::string rawBase,
 
 static void storeScalarToScalar(std::ostream &os, const std::string &lhs,
                                 const std::string &rhs) {
-  os << "*" << lhs << " = " << rhs << "; // SSS \n\t";
+  os << "*" << lhs << " = " << rhs << "; // Store Scalar to Scalar \n\t";
 }
 
 static std::string getOpSuffix(OperatorBase *op) {
@@ -741,7 +741,6 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
           args = {loaded[0], vecReduction};
         } else {
           args = {vecReduction, loaded[0], vecReduction};
-          // the intrinsic function pa
         }
       } else if (loaded.size() == 2) {
         if (hasTA(op) || hasTU(op)) { // tu or tam
