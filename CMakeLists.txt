@@ -4,10 +4,12 @@ project(vector-intrinsic-fuzzing LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY C_STANDARD 11)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
+#qj add
+set(MAKESILENT "")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -v --save-temps")
 set(INC ${CMAKE_CURRENT_LIST_DIR}/include)
 set(SPIKE ${CMAKE_CURRENT_LIST_DIR}/riscv-isa-sim)
 set(LIB ${CMAKE_CURRENT_LIST_DIR}/library)

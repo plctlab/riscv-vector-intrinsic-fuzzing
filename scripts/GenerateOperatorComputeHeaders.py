@@ -119,7 +119,8 @@ def parseCustomOperatorDefinitions(filename) :
       code_gen_func = create_vxm_op
     else :
       raise Exception("unrecognized id %s of type %s" % (op_id, op_type))
-
+#qj add
+    print("QQ into code_gen_func: ",opdef_info.op_type, opdef_info.op_id)
     code = code_gen_func(opdef_info.op_type,
                          opdef_info.op_id, 
                          opdef_info.op_attr,

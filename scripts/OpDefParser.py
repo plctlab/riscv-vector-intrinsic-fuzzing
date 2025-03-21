@@ -39,6 +39,9 @@ def parse(path):
       op_def_info.input_nfield = args[7]
       op_def_info.output_nfield = args[8]
       op_def_info.input_types = args[9:]
+#qj add
+      print(f"Processing line: {line.strip()}")
+      print(f"Parsed arguments: {args}")
 
       op_def_infos.append(op_def_info)
 
