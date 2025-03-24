@@ -200,8 +200,8 @@ add_test(
                   --has-policy
 )
 
-set(GCC_TOOLCHAIN_PREFIX "/home/xyenchi/dragon/riscv-gnu-toolchain/rif")
-set(COMPILER_TOOLCHAIN_PREFIX "/home/xyenchi/dragon/riscv-gnu-toolchain/rif")
+set(GCC_TOOLCHAIN_PREFIX "/home/xyenchi/dragon/riscv-gnu-toolchain/rif/bin/")
+set(COMPILER_TOOLCHAIN_PREFIX "/home/xyenchi/dragon/riscv-gnu-toolchain/rif/bin/")
 set(FUZZ 1)
 set(NODE 20)
 set(LENGTH 50)
@@ -242,12 +242,6 @@ execute_process(COMMAND ${GCC_TOOLCHAIN} --print-sysroot OUTPUT_VARIABLE SYSROOT
 set(CLANG "${COMPILER_TOOLCHAIN_PREFIX}/bin/riscv64-unknown-linux-gnu-clang")
 set(CFLAGS "-target riscv64-unknown-linux-gnu --sysroot ${SYSROOT} --gcc-toolchain=${GCC_TOOLCHAIN_PREFIX}")
 set(POLICY_ENABLE "")
-
-# execute_process(
-#   COMMAND
-#   bash -c "${CLANG} ${CFLAGS} -march=rv64gcv_zfh_zvfh -menable-experimental-extensions -c ${CMAKE_SOURCE_DIR}/test/codegen-golden/AddVV8VInt8TA.c"
-#   RESULT_VARIABLE OK
-# )
 
 if("${OK}" STREQUAL "0")
   set(POLICY_ENABLE "--has-policy")

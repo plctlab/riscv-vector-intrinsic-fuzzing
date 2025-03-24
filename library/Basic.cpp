@@ -214,6 +214,11 @@ bool isExistVs1Rs1(OperatorBase *op) {
   return true;
 }
 
+bool isRoundMode(OperatorBase *op) {
+  if (op->opAttr & FRM or op->opAttr & VXRM)
+    return true;
+}
+
 ValueBase *getVs1(OperatorBase *op) {
   ValueBase *vs1 = nullptr;
   if (!(op->opAttr & NoInputOperation) && isExistVs1Rs1(op)) {
@@ -231,6 +236,13 @@ ValueBase *getVs1(OperatorBase *op) {
                         : op->inputs[1];
   }
   return vs1;
+}
+
+ValueBase *getRoundingMode(OperatorBase *op) {
+  ValueBase *roundingMode = nullptr;
+  if (isRoundMode(op))
+    roundingMode = op->inputs[0];
+  return roundingMode;
 }
 
 bool isMaskOfOperator(OperatorBase *op, ValueBase *value) {

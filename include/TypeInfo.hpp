@@ -17,7 +17,7 @@ enum TypeClass {
   UNSIGNED_INT,
   FLOAT,
   BOOL,
-  VOID,
+  CONSTANT_INT,
   NumberOfTypeClasses,
 };
 
@@ -26,7 +26,7 @@ enum TypeClass {
   : (TC) == UNSIGNED_INT ? "uint"                                              \
   : (TC) == FLOAT        ? "float"                                             \
   : (TC) == BOOL         ? "bool"                                              \
-  : (TC) == VOID         ? "void"                                              \
+  : (TC) == CONSTANT_INT ? "const int"                                         \
                  : (assert("Unknown type class!?"), "<SOME_THING_WRONG>")
 
 #define TYPE_CLASS_SHORT_STR(TC)                                               \
@@ -76,6 +76,7 @@ private:
 };
 
 struct TypeInfo {
+	// operand type information
   static TypeInfo *create(LmulType lmul, SewType sew, TypeClass typeClass);
 
   static TypeInfo *getNarrowed(const TypeInfo &typeInfo, TypeClass typeClass);
@@ -104,6 +105,7 @@ struct TypeInfo {
   const std::string shortVectorTypeName;
   const std::string setvlTypeName;
   const std::string setvlmaxTypeName;
+  const std::string roundingmodeTypeName;
 
   bool isIntegerType() const {
     return isSignedIntegerType() || isUnsigedIntegerType();
@@ -112,6 +114,9 @@ struct TypeInfo {
   bool isUnsigedIntegerType() const { return typeClass == UNSIGNED_INT; };
   bool isFloatType() const { return typeClass == FLOAT; };
   bool isBoolType() const { return typeClass == BOOL; };
+  // rounding mode
+  bool isConstantIntType() const { return typeClass == CONSTANT
+  _INT; };
 
 private:
   TypeInfo(LmulType lmul, SewType sew, TypeClass typeClass)
@@ -127,7 +132,8 @@ private:
         setvlTypeName("__riscv_vsetvl_e" + sew.to_string() +
                       std::string(LMUL_STR(lmul))),
         setvlmaxTypeName("__riscv_vsetvlmax_e" + sew.to_string() +
-                         std::string(LMUL_STR(lmul))) {}
+                         std::string(LMUL_STR(lmul))),
+	roundingmodeTypeName(std::string(TYPE_CLASS_STR(typeClass))) {}
 };
 
 } // namespace RIF
