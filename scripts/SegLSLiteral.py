@@ -6,7 +6,7 @@ seg_load_literal_no_mask_body = '''
 '''
 
 seg_load_literal_no_mask_end = '''
-
+}
 '''
 
 seg_load_literal_mask_body = '''
@@ -14,7 +14,7 @@ seg_load_literal_mask_body = '''
 '''
 
 seg_load_literal_mask_end = '''
-
+}
 '''
 
 

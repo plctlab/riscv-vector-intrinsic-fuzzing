@@ -24,13 +24,13 @@ struct OpDefinition {
   uint32_t opAttr;
   CustomValType outputType;
   int numOfInputs;
-  std::string input_fields;
+  int input_fields;
   int output_field;
   std::vector<CustomValType> inputTypes;
   OpDefinition(CustomValType opType, std::string &&opTypeStr,
                std::string &&opId, int sew, TypeClass typeClass,
                uint32_t opAttr, CustomValType outputType, int numOfInputs,
-               std::string input_fields, int output_nfield,
+               int input_fields, int output_nfield,
                std::vector<CustomValType> inputTypes)
       : opType(opType), opTypeStr(std::move(opTypeStr)), opId(std::move(opId)),
         sew(sew), typeClass(typeClass), opAttr(opAttr), outputType(outputType),

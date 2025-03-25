@@ -258,10 +258,9 @@ v_literal_strided_load_mask_body = '''
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
-  auto dataMO = getRawPointer(b);
-  auto dataA = getRawPointer(c);
-  auto dataStride = getRawPointer(d);
-  auto dataOut = getRawPointer(e);
+  auto dataA = getRawPointer(b);
+  auto dataStride = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
 
   auto stride = *dataStride;
   stride = stride % 4 + 1; // lets deal with stride = [1, 4] or [-1, -4]

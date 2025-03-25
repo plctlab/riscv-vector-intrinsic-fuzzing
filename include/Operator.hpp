@@ -14,7 +14,7 @@ namespace RIF {
 struct InitializeOp : OperatorBase {
   InitializeOp(const std::string &id)
       : OperatorBase(CustomValType::Initialize, "vinit_rif", id, NoVLParameter,
-                     0, 1, 1, {}, NumberOfValTypes, 0, NumberOfLmuls,
+                     0, {}, 1, 1, NumberOfValTypes, 0, NumberOfLmuls,
                      NumberOfTypeClasses) {}
   virtual ~InitializeOp() = default;
   virtual void generateData() override;

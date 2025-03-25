@@ -88,11 +88,9 @@ struct ValueBase {
   // ctor for derived Operator
   ValueBase(const CustomValType &type, const std::string &typeID,
             const std::string &id, const unsigned numOfInputs,
-            const unsigned input_nfield, const unsigned output_nfield,
             TypeClass typeClass, int dataWidth, LmulType lmul)
       : type(type), typeID(typeID), id(id), dataTypeID(""), length(0),
-        inputs(numOfInputs, nullptr), input_nfield(input_nfield),
-        output_nfield(output_nfield), outputs(1, nullptr),
+        inputs(numOfInputs, nullptr), outputs(1, nullptr),
         typeInfo(TypeInfo::create(lmul, SewType{dataWidth}, typeClass)),
         dt(DataTypeEnum::Not_set) {}
 
@@ -109,8 +107,6 @@ struct ValueBase {
   const std::string dataTypeID;
 
   std::vector<ValueBase *> inputs;
-  const unsigned input_nfield;
-  const unsigned output_nfield;
   std::vector<std::vector<ValueBase *>> tuple_inputs; //todo:
   std::vector<ValueBase *> outputs;
 
@@ -149,6 +145,7 @@ enum OperatorAttr : OperatorAttrT {
   Miscellaneous = 1 << 22,
   SegStoreOperation = 1 << 23,
   SegLoadOperation = 1 << 24,
+  NeedMerge = 1 << 25,
 };
 
 struct OperatorBase : ValueBase {
@@ -162,9 +159,12 @@ struct OperatorBase : ValueBase {
 	       const unsigned output_nfield,
                const CustomValType outputType, int dataWidth, LmulType lmul,
                TypeClass typeClass)
-      : ValueBase(type, typeID, id, numOfInputs, input_nfield, output_nfield, 
-        typeClass, dataWidth, lmul),
+      : ValueBase(type, typeID, id, numOfInputs, typeClass, dataWidth, lmul),
+        input_nfield(input_nfield), output_nfield(output_nfield),
         opAttr(opAttr), inputTypes(inputTypes), outputType(outputType) {}
+
+	const unsigned input_nfield;
+	const unsigned output_nfield;
 
   virtual ~OperatorBase() = default;
 // (RIF::CustomValType, const char [8], const std::string&, unsigned int, int, <brace-enclosed initializer list>, unsigned int, unsigned int, RIF::CustomValType, int, RIF::LmulType&, RIF::TypeClass)
