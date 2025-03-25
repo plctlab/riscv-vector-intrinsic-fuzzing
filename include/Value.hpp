@@ -1,6 +1,9 @@
 // Value.hpp
 /*
-CustomValue template and declarations extended by MACRO in the .def file.
+CustomValue template and declarations extended by MACRO in the 
+include/.def file.
+
+The MACRO CUSTOM_ONE_D_TYPE and CUSTOM_SCALAR_TYPE are used under include/CustomValue.def.
 */
 #ifndef RIF_VALUE_HPP
 #define RIF_VALUE_HPP
@@ -11,7 +14,7 @@ CustomValue template and declarations extended by MACRO in the .def file.
 #include <random>
 
 namespace RIF {
-
+// One-D Value: One dimensional, represents an 1-D array of data
 #define CUSTOM_ONE_D_TYPE(CUSTOM_NAME, DATA_TYPE, DATA_WIDTH, DATA_CLASS,      \
                           MIN_VALUE, MAX_VALUE)                                \
   struct OneD##CUSTOM_NAME##Val : ValueBase {                                  \
@@ -36,6 +39,7 @@ namespace RIF {
 #undef CUSTOM_ONE_D_TYPE
 #undef CUSTOM_SCALAR_TYPE
 
+// Scalar Value: A single value
 #define CUSTOM_SCALAR_TYPE(CUSTOM_NAME, DATA_TYPE, DATA_WIDTH, DATA_CLASS,     \
                            MIN_VALUE, MAX_VALUE)                               \
   struct Scalar##CUSTOM_NAME##Val : ValueBase {                                \

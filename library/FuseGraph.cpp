@@ -362,7 +362,8 @@ bool isFusable(OperatorBase *op) {
   if (type == CustomValType::Initialize)
     return false;
   if (opAttr & ReductionOperation || opAttr & LoadOperation ||
-      opAttr & StoreOperation)
+      opAttr & StoreOperation || opAttr & SegLoadOperation ||
+      opAttr & SegStoreOperation)
     return false;
   if (typeID == "vcpop_m" || typeID == "vfirst_m" || typeID == "vmsbf_m" ||
       typeID == "vmsif_m" || typeID == "vmsof_m" || typeID == "viota_m" ||

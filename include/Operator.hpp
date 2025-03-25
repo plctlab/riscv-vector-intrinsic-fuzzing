@@ -14,7 +14,7 @@ namespace RIF {
 struct InitializeOp : OperatorBase {
   InitializeOp(const std::string &id)
       : OperatorBase(CustomValType::Initialize, "vinit_rif", id, NoVLParameter,
-                     0, {}, NumberOfValTypes, 0, NumberOfLmuls,
+                     0, 1, 1, {}, NumberOfValTypes, 0, NumberOfLmuls,
                      NumberOfTypeClasses) {}
   virtual ~InitializeOp() = default;
   virtual void generateData() override;
@@ -22,12 +22,13 @@ struct InitializeOp : OperatorBase {
 };
 
 #define CUSTOM_OP_TYPE(OP_TYPE, OP_ID, SEW, TYPE_CLASS, OP_ATTR, OUTPUT_TYPE,  \
-                       NUM_OF_INPUTS, INPUT_NFIELD, OUTPUT_FIELD, ...)         \
+                       NUM_OF_INPUTS, INPUT_NFIELD, OUTPUT_NFIELD, ...)        \
   struct OP_TYPE##Op : OperatorBase {                                          \
     OP_TYPE##Op(const std::string &id, LmulType lmul)                          \
         : OperatorBase(CustomValType::OP_TYPE, "v" #OP_ID, id, OP_ATTR,        \
-                       NUM_OF_INPUTS, {__VA_ARGS__}, OUTPUT_TYPE, SEW, lmul,   \
-                       TYPE_CLASS) {}                                          \
+                       NUM_OF_INPUTS##u, {__VA_ARGS__},                        \
+		       INPUT_NFIELD##u, OUTPUT_NFIELD##u, OUTPUT_TYPE,         \
+		       SEW, lmul, TYPE_CLASS) {}                               \
     virtual ~OP_TYPE##Op() = default;                                          \
     virtual void generateData() override;                                      \
     virtual void generateCCode(std::ostream &os) override;                     \
@@ -88,7 +89,7 @@ struct CodeGenForOperator {
   std::vector<ValuePair> opInputs;
   ValuePair opOutput;
   void getRawPointers(std::vector<ValueBase *> inputs, ValueBase *output);
-  void getTupleRawPointers(std::vectore<std::vector<ValueBase *>> tuple_inputs);
+  void getTupleRawPointers(std::vector<std::vector<ValueBase *>> tuple_inputs);
 
   // With the pointers of the raw pointers, we will need to use vle or vmv to
   // load raw data into rvv data type. This is done inside this function.

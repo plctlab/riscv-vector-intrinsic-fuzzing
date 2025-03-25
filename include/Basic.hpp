@@ -81,17 +81,17 @@ struct ValueBase {
             const std::string &id, const std::string &dataTypeID,
             const int length, TypeClass typeClass, int dataWidth, LmulType lmul)
       : type(type), typeID(typeID), id(id), dataTypeID(dataTypeID),
-        length(length), inputs(1, nullptr),
+        length(length), inputs(1, nullptr), 
         typeInfo(TypeInfo::create(lmul, SewType{dataWidth}, typeClass)),
         dt(getDataTypeEnum(dataTypeID.c_str())) {}
 
   // ctor for derived Operator
   ValueBase(const CustomValType &type, const std::string &typeID,
             const std::string &id, const unsigned numOfInputs,
-            std::string input_nfields, int output_nfield,
+            const unsigned input_nfield, const unsigned output_nfield,
             TypeClass typeClass, int dataWidth, LmulType lmul)
       : type(type), typeID(typeID), id(id), dataTypeID(""), length(0),
-        inputs(numOfInputs, nullptr), input_nfields(input_nfields), 
+        inputs(numOfInputs, nullptr), input_nfield(input_nfield),
         output_nfield(output_nfield), outputs(1, nullptr),
         typeInfo(TypeInfo::create(lmul, SewType{dataWidth}, typeClass)),
         dt(DataTypeEnum::Not_set) {}
@@ -107,10 +107,10 @@ struct ValueBase {
   const std::string typeID;
   const std::string id;
   const std::string dataTypeID;
-  std::string input_nfields;
-  int output_nfield;
 
   std::vector<ValueBase *> inputs;
+  const unsigned input_nfield;
+  const unsigned output_nfield;
   std::vector<std::vector<ValueBase *>> tuple_inputs; //todo:
   std::vector<ValueBase *> outputs;
 
@@ -152,21 +152,22 @@ enum OperatorAttr : OperatorAttrT {
 };
 
 struct OperatorBase : ValueBase {
-
-  OperatorBase(const CustomValType &type, const std::string &typeID,
-               const std::string &id, const OperatorAttrT opAttr,
-               const unsigned numOfInputs,
-               std::string input_nfields,
-               int output_nfield,
+  OperatorBase(const CustomValType &type, 
+		const std::string &typeID,
+               const std::string &id, 
+	       const OperatorAttrT opAttr,
+	       const unsigned numOfInputs, // number of inputs,
                const std::initializer_list<CustomValType> inputTypes,
+	       const unsigned input_nfield,
+	       const unsigned output_nfield,
                const CustomValType outputType, int dataWidth, LmulType lmul,
                TypeClass typeClass)
-      : ValueBase(type, typeID, id, numOfInputs, input_nfields, output_nfield, 
+      : ValueBase(type, typeID, id, numOfInputs, input_nfield, output_nfield, 
         typeClass, dataWidth, lmul),
         opAttr(opAttr), inputTypes(inputTypes), outputType(outputType) {}
 
   virtual ~OperatorBase() = default;
-
+// (RIF::CustomValType, const char [8], const std::string&, unsigned int, int, <brace-enclosed initializer list>, unsigned int, unsigned int, RIF::CustomValType, int, RIF::LmulType&, RIF::TypeClass)
   // returns 1 if fail
   int addInput(int inputIdx, ValueBase *input) {
     if (inputIdx >= inputs.size()) {

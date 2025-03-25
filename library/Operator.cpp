@@ -1092,6 +1092,10 @@ static std::set<std::string> stridedStoreTypeID = {
     "vsse64_v",
 };
 
+#define A(x) "v"x"8_v", "v"x"16_v", "v"x"32_v", "v"x"64_v"
+
+A("sse") = "v""sse""8_v"
+
 static std::set<std::string> indexedLoadTypeID = {
     "vluxei8_v", "vluxei16_v", "vluxei32_v", "vluxei64_v",
     "vloxei8_v", "vloxei16_v", "vloxei32_v", "vloxei64_v",
@@ -1301,7 +1305,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
     return ret;
   }
 
-  std::vector<std::string> getIntrinsicArguments(const LoadStoreType &type) {
+  std::vector<std::string> getIntrinsicArguments() {
     if (type == Le || type == Se)
       return getUnitStrideArguments();
     else if (type == Lxei || type == Sxei)
@@ -1418,7 +1422,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
       } else {
         getVL(counter);
       }
-      std::vector<std::string> args = getIntrinsicArguments(type);
+      std::vector<std::string> args = getIntrinsicArguments();
       if (type == Sse) {
         auto inputStride = hasMask(op) ? opInputs[2] : opInputs[1];
         auto stride = inputStride.second;

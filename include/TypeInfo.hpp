@@ -115,8 +115,7 @@ struct TypeInfo {
   bool isFloatType() const { return typeClass == FLOAT; };
   bool isBoolType() const { return typeClass == BOOL; };
   // rounding mode
-  bool isConstantIntType() const { return typeClass == CONSTANT
-  _INT; };
+  bool isConstantIntType() const { return typeClass == CONSTANT_INT; };
 
 private:
   TypeInfo(LmulType lmul, SewType sew, TypeClass typeClass)
