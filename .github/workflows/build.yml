@@ -7,9 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-
     - uses: actions/checkout@v2
-
     - name: build generator
       run: |
         mkdir -p build
@@ -17,21 +15,49 @@ jobs:
         cmake ..
         make -j $(nproc)
         ./tool/randomgen
+    - uses: actions/upload-artifact@v4
+      with:
+        name: built
+        path: build
 
+  test:
+    # needs: build
+    runs-on: ubuntu-latest
+    env:
+      COMPILER_TAG: '2025.03.28'
+    strategy:
+      matrix:
+        compiler: [gcc, llvm]
+    steps:
     - name: download compiler with v extension release
+      id: download
       uses: robinraju/release-downloader@v1
       with:
         repository: XYenChi/riscv-gnu-toolchain
-        tag: '2025.03.28'
-        fileName: 'riscv64-elf-ubuntu-24.04-gcc-nightly-2025.03.28-nightly.tar.xz'
+        tag: ${{env.COMPILER_TAG}}
+        fileName: 'riscv64-elf-ubuntu-24.04-${{matrix.compiler}}-nightly-${{env.COMPILER_TAG}}-nightly.tar.xz'
 
-    - name: extract compiler 
+    - name: extract compiler
       run: |
-        tar -xvf riscv64-elf-ubuntu-24.04-gcc-nightly-2025.03.28-nightly.tar.xz
-        export PATH=$PWD/riscv64-elf-ubuntu-24.04-gcc-nightly-2025.03.28-nightly/bin:$PATH         
-    - name: run gcc test
+        tar -Jxvf "${{fromJson(steps.download.outputs.downloaded_files)[0]}}"
+        export PATH=$PWD/riscv/bin:$PATH
+        case "${{matrix.compiler}}" in
+          "gcc")
+            export CC="riscv64-unknown-elf-gcc";;
+          "llvm")
+            export CC="clang";;
+        esac
+
+    - uses: actions/checkout@v2
+
+    - uses: actions/download-artifact@v4
+      with:
+        path: build
+
+    - name: run ${{matrix.compiler}} test
       run: |
+        env
         cd test
         make clean
-        ../rif-test --cc=riscv64-unkown-elf-gcc
+        ./rif-test --cc=$CC
         make -j $(nproc)
