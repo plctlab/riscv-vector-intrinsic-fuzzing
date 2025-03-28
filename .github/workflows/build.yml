@@ -1,0 +1,17 @@
+name: build
+on:
+  push:
+    branches: [dev]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: build generator
+      run: |
+        mkdir -p build
+        cd build
+        cmake ..
+        make -j $(nproc)
+        ./tool/randomgen
