@@ -26,8 +26,9 @@ enum TypeClass {
   : (TC) == UNSIGNED_INT ? "uint"                                              \
   : (TC) == FLOAT        ? "float"                                             \
   : (TC) == BOOL         ? "bool"                                              \
-  : (TC) == CONSTANT_INT ? "const int"                                         \
-                 : (assert("Unknown type class!?"), "<SOME_THING_WRONG>")
+  : (TC) == CONSTANT_INT                                                       \
+      ? "const int"                                                            \
+      : (assert("Unknown type class!?"), "<SOME_THING_WRONG>")
 
 #define TYPE_CLASS_SHORT_STR(TC)                                               \
   (TC) == SIGNED_INT     ? "i"                                                 \
@@ -76,7 +77,7 @@ private:
 };
 
 struct TypeInfo {
-	// operand type information
+  // operand type information
   static TypeInfo *create(LmulType lmul, SewType sew, TypeClass typeClass);
 
   static TypeInfo *getNarrowed(const TypeInfo &typeInfo, TypeClass typeClass);
@@ -132,7 +133,7 @@ private:
                       std::string(LMUL_STR(lmul))),
         setvlmaxTypeName("__riscv_vsetvlmax_e" + sew.to_string() +
                          std::string(LMUL_STR(lmul))),
-	roundingmodeTypeName(std::string(TYPE_CLASS_STR(typeClass))) {}
+        roundingmodeTypeName(std::string(TYPE_CLASS_STR(typeClass))) {}
 };
 
 } // namespace RIF

@@ -1092,13 +1092,15 @@ static std::set<std::string> stridedStoreTypeID = {
     "vsse64_v",
 };
 
-#define A(x) "v"x"8_v", "v"x"16_v", "v"x"32_v", "v"x"64_v"
+#define A(x) "v" x "8_v", "v" x "16_v", "v" x "32_v", "v" x "64_v"
 
-A("sse") = "v""sse""8_v"
+A("sse") = "v"
+           "sse"
+           "8_v"
 
-static std::set<std::string> indexedLoadTypeID = {
-    "vluxei8_v", "vluxei16_v", "vluxei32_v", "vluxei64_v",
-    "vloxei8_v", "vloxei16_v", "vloxei32_v", "vloxei64_v",
+    static std::set<std::string> indexedLoadTypeID = {
+        "vluxei8_v", "vluxei16_v", "vluxei32_v", "vluxei64_v",
+        "vloxei8_v", "vloxei16_v", "vloxei32_v", "vloxei64_v",
 };
 
 static std::set<std::string> indexedStoreTypeID = {

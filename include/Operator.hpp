@@ -26,9 +26,9 @@ struct InitializeOp : OperatorBase {
   struct OP_TYPE##Op : OperatorBase {                                          \
     OP_TYPE##Op(const std::string &id, LmulType lmul)                          \
         : OperatorBase(CustomValType::OP_TYPE, "v" #OP_ID, id, OP_ATTR,        \
-                       NUM_OF_INPUTS##u, {__VA_ARGS__},                        \
-		       INPUT_NFIELD##u, OUTPUT_NFIELD##u, OUTPUT_TYPE,         \
-		       SEW, lmul, TYPE_CLASS) {}                               \
+                       NUM_OF_INPUTS##u, {__VA_ARGS__}, INPUT_NFIELD##u,       \
+                       OUTPUT_NFIELD##u, OUTPUT_TYPE, SEW, lmul, TYPE_CLASS) { \
+    }                                                                          \
     virtual ~OP_TYPE##Op() = default;                                          \
     virtual void generateData() override;                                      \
     virtual void generateCCode(std::ostream &os) override;                     \
@@ -83,7 +83,7 @@ struct CodeGenForOperator {
   OperatorBase *op;
   TypeInfo vlTypeInfo;
   size_t loopLength;
-  
+
   // Loads raw data into pointer placeholders. The names of generated
   // placeholders are stored in `opInputs` and opOutput.
   std::vector<ValuePair> opInputs;

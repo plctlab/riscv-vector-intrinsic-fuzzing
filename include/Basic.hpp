@@ -81,7 +81,7 @@ struct ValueBase {
             const std::string &id, const std::string &dataTypeID,
             const int length, TypeClass typeClass, int dataWidth, LmulType lmul)
       : type(type), typeID(typeID), id(id), dataTypeID(dataTypeID),
-        length(length), inputs(1, nullptr), 
+        length(length), inputs(1, nullptr),
         typeInfo(TypeInfo::create(lmul, SewType{dataWidth}, typeClass)),
         dt(getDataTypeEnum(dataTypeID.c_str())) {}
 
@@ -107,7 +107,7 @@ struct ValueBase {
   const std::string dataTypeID;
 
   std::vector<ValueBase *> inputs;
-  std::vector<std::vector<ValueBase *>> tuple_inputs; //todo:
+  std::vector<std::vector<ValueBase *>> tuple_inputs; // todo:
   std::vector<ValueBase *> outputs;
 
   int length;
@@ -149,26 +149,24 @@ enum OperatorAttr : OperatorAttrT {
 };
 
 struct OperatorBase : ValueBase {
-  OperatorBase(const CustomValType &type, 
-		const std::string &typeID,
-               const std::string &id, 
-	       const OperatorAttrT opAttr,
-	       const unsigned numOfInputs, // number of inputs,
+  OperatorBase(const CustomValType &type, const std::string &typeID,
+               const std::string &id, const OperatorAttrT opAttr,
+               const unsigned numOfInputs, // number of inputs,
                const std::initializer_list<CustomValType> inputTypes,
-	       const unsigned input_nfield,
-	       const unsigned output_nfield,
+               const unsigned input_nfield, const unsigned output_nfield,
                const CustomValType outputType, int dataWidth, LmulType lmul,
                TypeClass typeClass)
       : ValueBase(type, typeID, id, numOfInputs, typeClass, dataWidth, lmul),
         input_nfield(input_nfield), output_nfield(output_nfield),
         opAttr(opAttr), inputTypes(inputTypes), outputType(outputType) {}
 
-	const unsigned input_nfield;
-	const unsigned output_nfield;
+  const unsigned input_nfield;
+  const unsigned output_nfield;
 
   virtual ~OperatorBase() = default;
-// (RIF::CustomValType, const char [8], const std::string&, unsigned int, int, <brace-enclosed initializer list>, unsigned int, unsigned int, RIF::CustomValType, int, RIF::LmulType&, RIF::TypeClass)
-  // returns 1 if fail
+  // (RIF::CustomValType, const char [8], const std::string&, unsigned int, int,
+  // <brace-enclosed initializer list>, unsigned int, unsigned int,
+  // RIF::CustomValType, int, RIF::LmulType&, RIF::TypeClass) returns 1 if fail
   int addInput(int inputIdx, ValueBase *input) {
     if (inputIdx >= inputs.size()) {
       std::cerr << "addInput: inputIdx is out of range, abort.\n";

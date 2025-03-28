@@ -34,8 +34,8 @@ struct OpDefinition {
                std::vector<CustomValType> inputTypes)
       : opType(opType), opTypeStr(std::move(opTypeStr)), opId(std::move(opId)),
         sew(sew), typeClass(typeClass), opAttr(opAttr), outputType(outputType),
-        numOfInputs(numOfInputs), input_fields(input_fields), output_field(output_field), 
-        inputTypes(inputTypes) {}
+        numOfInputs(numOfInputs), input_fields(input_fields),
+        output_field(output_field), inputTypes(inputTypes) {}
 };
 
 bool Graph::isConstructedUseDefineCandidate = false;
@@ -55,9 +55,9 @@ static void getOpDefinitions() {
 #define CUSTOM_OP_TYPE(OP_TYPE, OP_ID, SEW, TYPE_CLASS, OP_ATTR, OUTPUT_TYPE,  \
                        NUM_OF_INPUTS, INPUT_NFIELDS, OUTPUT_NFIELD, ...)       \
   {                                                                            \
-    OpDefinition opDef{OP_TYPE,     #OP_TYPE,      std::string(#OP_ID),        \
-                       SEW,         TYPE_CLASS,    OP_ATTR,                    \
-                       OUTPUT_TYPE, NUM_OF_INPUTS, INPUT_NFIELDS,              \
+    OpDefinition opDef{OP_TYPE,       #OP_TYPE,      std::string(#OP_ID),      \
+                       SEW,           TYPE_CLASS,    OP_ATTR,                  \
+                       OUTPUT_TYPE,   NUM_OF_INPUTS, INPUT_NFIELDS,            \
                        OUTPUT_NFIELD, {__VA_ARGS__}};                          \
     opDefs.push_back(opDef);                                                   \
   }
@@ -287,7 +287,7 @@ void Graph::generateCCode(std::ostream &os, uint32_t seed) {
     // values that are non-intermediate results.
     if (VerificationMode == "short" && op->outputs[0]->outputs.size() != 0)
       continue;
-      
+
     os << "int golden_" << op->getNameWithType() << "() {\n";
 
     generateVerificationCode(os, op);

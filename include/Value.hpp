@@ -1,9 +1,10 @@
 // Value.hpp
 /*
-CustomValue template and declarations extended by MACRO in the 
+CustomValue template and declarations extended by MACRO in the
 include/.def file.
 
-The MACRO CUSTOM_ONE_D_TYPE and CUSTOM_SCALAR_TYPE are used under include/CustomValue.def.
+The MACRO CUSTOM_ONE_D_TYPE and CUSTOM_SCALAR_TYPE are used under
+include/CustomValue.def.
 */
 #ifndef RIF_VALUE_HPP
 #define RIF_VALUE_HPP
