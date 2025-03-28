@@ -4,8 +4,6 @@ project(vector-intrinsic-fuzzing LANGUAGES CXX C)
 
 set_property(GLOBAL PROPERTY C_STANDARD 11)
 set_property(GLOBAL PROPERTY CXX_STANDARD 17)
-#qj add
-set(MAKESILENT "")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)

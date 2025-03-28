@@ -7,7 +7,9 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+
     - uses: actions/checkout@v2
+
     - name: build generator
       run: |
         mkdir -p build
@@ -15,3 +17,21 @@ jobs:
         cmake ..
         make -j $(nproc)
         ./tool/randomgen
+
+    - name: download compiler with v extension release
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: XYenChi/riscv-gnu-toolchain
+        tag: '2025.03.28'
+        fileName: 'riscv64-elf-ubuntu-24.04-gcc-nightly-2025.03.28-nightly.tar.xz'
+
+    - name: extract compiler 
+      run: |
+        tar -xvf riscv64-elf-ubuntu-24.04-gcc-nightly-2025.03.28-nightly.tar.xz
+        export PATH=$PWD/riscv64-elf-ubuntu-24.04-gcc-nightly-2025.03.28-nightly/bin:$PATH         
+    - name: run gcc test
+      run: |
+        cd test
+        make clean
+        ../rif-test --cc=riscv64-unkown-elf-gcc
+        make -j $(nproc)
