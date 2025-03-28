@@ -4,13 +4,16 @@ This repository aims to create fuzz testing for the RVV C intrinsic.
 
 ## Usage
 
+1. Build the random generator tool.
+2. Use the test driver under test/.
+
 ### How To Build?
 
 ```
 $ git clone https://github.com/sifive/riscv-vector-intrinsic-fuzzing
 $ cd riscv-vector-intrinsic-fuzzing
-$ cd test/build
-$ cmake ../..
+$ cd build
+$ cmake ..
 $ make
 $ ./tool/random_gen --help
 Usage: random_gen [OPTION...]
