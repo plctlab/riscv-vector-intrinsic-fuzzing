@@ -230,7 +230,8 @@ static std::string getVectorFromConstant(std::ostream &os, int constant,
                                          const TypeInfo &typeInfo) {
   std::string result = getNewPlaceholderName();
   os << typeInfo.vectorTypeName << " " << result
-     << (typeInfo.typeClass == FLOAT ? "= __riscv_vfmv_v_f_" : "= __riscv_vmv_v_x_")
+     << (typeInfo.typeClass == FLOAT ? "= __riscv_vfmv_v_f_"
+                                     : "= __riscv_vmv_v_x_")
      << typeInfo.shortVectorTypeName << "(" << constant << ", "
      << typeInfo.setvlmaxTypeName << "());\n";
   return result;
@@ -278,8 +279,9 @@ static std::string getFlippedMaskReg(std::ostream &os,
   int booleanSew = getBooleanSew(typeInfo);
   std::string vecMaskSet = getVmsetMaskReg(os, typeInfo);
   std::string flippedMaskReg = getNewPlaceholderName();
-  os << "vbool" << booleanSew << "_t " << flippedMaskReg << " = __riscv_vmandn_mm_b"
-     << booleanSew << "(" << vecMaskSet << ", " << maskReg << ", vl);\n";
+  os << "vbool" << booleanSew << "_t " << flippedMaskReg
+     << " = __riscv_vmandn_mm_b" << booleanSew << "(" << vecMaskSet << ", "
+     << maskReg << ", vl);\n";
   return flippedMaskReg;
 }
 
@@ -322,8 +324,8 @@ std::string loadOneDToVector(std::ostream &os, ValueBase *value,
 
     std::string lmulStr = LMUL_STR(static_cast<LmulType>(booleanLmul));
 
-    os << "vint8" << lmulStr << "_t " << vecHolder << "= __riscv_vle8_v_i8" << lmulStr
-       << "(" << holder << ", vl);\n";
+    os << "vint8" << lmulStr << "_t " << vecHolder << "= __riscv_vle8_v_i8"
+       << lmulStr << "(" << holder << ", vl);\n";
     os << "vbool" << booleanSew << "_t " << resultVec << "= __riscv_vmseq_vx_i8"
        << lmulStr << "_b" << booleanSew << "(" << vecHolder << ", 1, vl);\n";
   } else { // normal
@@ -416,7 +418,8 @@ std::string genOpString(std::ostream &os, OperatorBase *op,
   if (!(opAttr & VoidOperation)) { // non void operation
     resultVec = getUniqueName("vec_" + output->id);
     if (output->type == CustomValType::OneDBool)
-      os << "vbool" << getBooleanSew(typeInfo) << "_t " << resultVec << "= __riscv_";
+      os << "vbool" << getBooleanSew(typeInfo) << "_t " << resultVec
+         << "= __riscv_";
     else
       os << output->typeInfo->vectorTypeName << " " << resultVec << "= ";
   }
@@ -435,7 +438,8 @@ std::string genOpString(std::ostream &os, OperatorBase *op,
       os << op->typeID << "_" << shortVectorTypeName;
     }
   } else // normal operator
-    os << "__riscv_" << instrisicFuncPrefix << "_" << output->typeInfo->shortVectorTypeName;
+    os << "__riscv_" << instrisicFuncPrefix << "_"
+       << output->typeInfo->shortVectorTypeName;
 
   genIntrinsicFuncSuffix(os, op, args);
 
@@ -453,11 +457,14 @@ void storeVectorToOneD(std::ostream &os, const std::string rawBase,
     os << "{\n";
     os << "size_t vlmax = " << typeInfo->setvlmaxTypeName << "();\n";
     os << typeInfo->vectorTypeName << " zero = "
-       << "__riscv_vmv_v_x_" << typeInfo->shortVectorTypeName << "(0, vlmax);\n";
+       << "__riscv_vmv_v_x_" << typeInfo->shortVectorTypeName
+       << "(0, vlmax);\n";
     os << typeInfo->vectorTypeName << " vec_store = "
-       << "__riscv_vmerge_vxm_" << typeInfo->shortVectorTypeName << "(" << vec << ", "
+       << "__riscv_vmerge_vxm_" << typeInfo->shortVectorTypeName << "(" << vec
+       << ", "
        << "zero, 1, vl);\n";
-    os << "__riscv_vse8_v_" << typeInfo->shortVectorTypeName << "(" << rawBase << ", "
+    os << "__riscv_vse8_v_" << typeInfo->shortVectorTypeName << "(" << rawBase
+       << ", "
        << "vec_store, vl);\n";
     os << "}\n";
   } else {
@@ -698,7 +705,8 @@ struct CodeGenForVcpop : CodeGenForOperator {
   }
   void genVcpopOpString(const std::string &popcountStr,
                         const std::vector<std::string> &args) {
-    os << popcountStr << " += __riscv_vcpop_m_b" << getBooleanSew(*op->typeInfo);
+    os << popcountStr << " += __riscv_vcpop_m_b"
+       << getBooleanSew(*op->typeInfo);
     genIntrinsicFuncSuffix(os, op, args);
   }
   std::string getPopcountCounter() {
@@ -822,8 +830,8 @@ struct CodeGenForVmsbfVmsifVmsof : CodeGenForOperator {
         hasMask(op) ? op->opAttr & NoMaskedOff ? args[1] : args[2] : args[0];
     if (hasMask(op)) {
       auto vecM = args[0];
-      os << first << " = __riscv_vfirst_m_b" << booleanSew << "_m(" << vecM << ", "
-         << vecVs2 << ", vl);\n";
+      os << first << " = __riscv_vfirst_m_b" << booleanSew << "_m(" << vecM
+         << ", " << vecVs2 << ", vl);\n";
     } else {
       os << first << " = __riscv_vfirst_m_b" << booleanSew << "(" << vecVs2
          << ", vl);\n";
@@ -888,14 +896,14 @@ struct CodeGenForViota : CodeGenForOperator {
                      : hasTAMA(op) ? args[1]
                                     : args[2];
     if (hasNonmask(op))
-      os << accumulateMask << " += __riscv_vcpop_m_b" << getBooleanSew(vlTypeInfo)
-         << "(" << vecInputA << ", " << (haveTailPolicy(op) ? "tail_vl" : "vl")
-         << ");\n";
+      os << accumulateMask << " += __riscv_vcpop_m_b"
+         << getBooleanSew(vlTypeInfo) << "(" << vecInputA << ", "
+         << (haveTailPolicy(op) ? "tail_vl" : "vl") << ");\n";
     else {
       auto vecM = args[0];
-      os << accumulateMask << " += __riscv_vcpop_m_b" << getBooleanSew(vlTypeInfo)
-         << "_m(" << vecM << ", " << vecInputA << ", "
-         << (haveTailPolicy(op) ? "tail_vl" : "vl") << ");\n";
+      os << accumulateMask << " += __riscv_vcpop_m_b"
+         << getBooleanSew(vlTypeInfo) << "_m(" << vecM << ", " << vecInputA
+         << ", " << (haveTailPolicy(op) ? "tail_vl" : "vl") << ");\n";
     }
   }
   void generateSingleOperatorCode() {
