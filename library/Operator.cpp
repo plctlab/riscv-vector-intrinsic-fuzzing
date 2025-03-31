@@ -230,7 +230,7 @@ static std::string getVectorFromConstant(std::ostream &os, int constant,
                                          const TypeInfo &typeInfo) {
   std::string result = getNewPlaceholderName();
   os << typeInfo.vectorTypeName << " " << result
-     << (typeInfo.typeClass == FLOAT ? "= vfmv_v_f_" : "= vmv_v_x_")
+     << (typeInfo.typeClass == FLOAT ? "= __riscv_vfmv_v_f_" : "= __riscv_vmv_v_x_")
      << typeInfo.shortVectorTypeName << "(" << constant << ", "
      << typeInfo.setvlmaxTypeName << "());\n";
   return result;
@@ -239,7 +239,7 @@ static std::string getVectorFromVector(std::ostream &os,
                                        const std::string &vecPlaceholder,
                                        const TypeInfo &typeInfo) {
   std::string result = getNewPlaceholderName();
-  os << typeInfo.vectorTypeName << " " << result << "= vmv_v_v_"
+  os << typeInfo.vectorTypeName << " " << result << "= __riscv_vmv_v_v_"
      << typeInfo.shortVectorTypeName << "(" << vecPlaceholder << ", "
      << typeInfo.setvlmaxTypeName << "());\n";
   return result;
@@ -258,7 +258,7 @@ static std::string getVmsetMaskReg(std::ostream &os, const TypeInfo &typeInfo) {
   std::string result = getNewPlaceholderName();
   int booleanSew = getBooleanSew(typeInfo);
   os << "vbool" << std::to_string(booleanSew) << "_t " << result
-     << " = vmset_m_b" << std::to_string(booleanSew) << "("
+     << " = __riscv_vmset_m_b" << std::to_string(booleanSew) << "("
      << typeInfo.setvlmaxTypeName << "());\n";
   return result;
 }
@@ -267,7 +267,7 @@ static std::string getVmclrMaskReg(std::ostream &os, const TypeInfo &typeInfo) {
   std::string result = getNewPlaceholderName();
   int booleanSew = getBooleanSew(typeInfo);
   os << "vbool" << std::to_string(booleanSew) << "_t " << result
-     << " = vmclr_m_b" << std::to_string(booleanSew) << "("
+     << " = __riscv_vmclr_m_b" << std::to_string(booleanSew) << "("
      << typeInfo.setvlmaxTypeName << "());\n";
   return result;
 }
@@ -278,7 +278,7 @@ static std::string getFlippedMaskReg(std::ostream &os,
   int booleanSew = getBooleanSew(typeInfo);
   std::string vecMaskSet = getVmsetMaskReg(os, typeInfo);
   std::string flippedMaskReg = getNewPlaceholderName();
-  os << "vbool" << booleanSew << "_t " << flippedMaskReg << " = vmandn_mm_b"
+  os << "vbool" << booleanSew << "_t " << flippedMaskReg << " = __riscv_vmandn_mm_b"
      << booleanSew << "(" << vecMaskSet << ", " << maskReg << ", vl);\n";
   return flippedMaskReg;
 }
@@ -298,7 +298,7 @@ static void setVL(std::ostream &os, const std::string &counter,
     int booleanSew = getBooleanSew(typeInfo);
     int booleanLmul = getBooleanLmul(typeInfo);
     std::string lmulStr = LMUL_STR(static_cast<LmulType>(booleanLmul));
-    os << "vl = vsetvl_e8" << lmulStr << "(" << counter << ");\n";
+    os << "vl = __riscv_vsetvl_e8" << lmulStr << "(" << counter << ");\n";
   } else
     os << "vl = " << typeInfo.setvlTypeName << "(" << counter << ");\n";
 }
@@ -322,13 +322,13 @@ std::string loadOneDToVector(std::ostream &os, ValueBase *value,
 
     std::string lmulStr = LMUL_STR(static_cast<LmulType>(booleanLmul));
 
-    os << "vint8" << lmulStr << "_t " << vecHolder << "= vle8_v_i8" << lmulStr
+    os << "vint8" << lmulStr << "_t " << vecHolder << "= __riscv_vle8_v_i8" << lmulStr
        << "(" << holder << ", vl);\n";
-    os << "vbool" << booleanSew << "_t " << resultVec << "= vmseq_vx_i8"
+    os << "vbool" << booleanSew << "_t " << resultVec << "= __riscv_vmseq_vx_i8"
        << lmulStr << "_b" << booleanSew << "(" << vecHolder << ", 1, vl);\n";
   } else { // normal
     resultVec = getUniqueName("vec_" + value->id);
-    os << typeInfo.vectorTypeName << " " << resultVec << "= vle"
+    os << typeInfo.vectorTypeName << " " << resultVec << "= __riscv_vle"
        << typeInfo.sew.to_string() << "_v_" << typeInfo.shortVectorTypeName
        << "(" << holder << ", vl);\n";
   }
@@ -397,7 +397,7 @@ static void genReductionOpString(std::ostream &os, OperatorBase *op,
   assert(vd != nullptr);
   assert(vs2 != nullptr);
 
-  os << vecReduction << " = " << instrisicFuncPrefix << "_"
+  os << vecReduction << " = __riscv_" << instrisicFuncPrefix << "_"
      << vs2->typeInfo->shortVectorTypeName << "_"
      << vd->typeInfo->shortVectorTypeName;
 
@@ -416,7 +416,7 @@ std::string genOpString(std::ostream &os, OperatorBase *op,
   if (!(opAttr & VoidOperation)) { // non void operation
     resultVec = getUniqueName("vec_" + output->id);
     if (output->type == CustomValType::OneDBool)
-      os << "vbool" << getBooleanSew(typeInfo) << "_t " << resultVec << "= ";
+      os << "vbool" << getBooleanSew(typeInfo) << "_t " << resultVec << "= __riscv_";
     else
       os << output->typeInfo->vectorTypeName << " " << resultVec << "= ";
   }
@@ -435,7 +435,7 @@ std::string genOpString(std::ostream &os, OperatorBase *op,
       os << op->typeID << "_" << shortVectorTypeName;
     }
   } else // normal operator
-    os << instrisicFuncPrefix << "_" << output->typeInfo->shortVectorTypeName;
+    os << "__riscv_" << instrisicFuncPrefix << "_" << output->typeInfo->shortVectorTypeName;
 
   genIntrinsicFuncSuffix(os, op, args);
 
@@ -453,16 +453,16 @@ void storeVectorToOneD(std::ostream &os, const std::string rawBase,
     os << "{\n";
     os << "size_t vlmax = " << typeInfo->setvlmaxTypeName << "();\n";
     os << typeInfo->vectorTypeName << " zero = "
-       << "vmv_v_x_" << typeInfo->shortVectorTypeName << "(0, vlmax);\n";
+       << "__riscv_vmv_v_x_" << typeInfo->shortVectorTypeName << "(0, vlmax);\n";
     os << typeInfo->vectorTypeName << " vec_store = "
-       << "vmerge_vxm_" << typeInfo->shortVectorTypeName << "(" << vec << ", "
+       << "__riscv_vmerge_vxm_" << typeInfo->shortVectorTypeName << "(" << vec << ", "
        << "zero, 1, vl);\n";
-    os << "vse8_v_" << typeInfo->shortVectorTypeName << "(" << rawBase << ", "
+    os << "__riscv_vse8_v_" << typeInfo->shortVectorTypeName << "(" << rawBase << ", "
        << "vec_store, vl);\n";
     os << "}\n";
   } else {
     auto typeInfo = *value->typeInfo;
-    os << "vse" << typeInfo.sew.to_string() << "_v_"
+    os << "__riscv_vse" << typeInfo.sew.to_string() << "_v_"
        << typeInfo.shortVectorTypeName << "(" << rawBase << ", " << vec
        << ", vl);\n";
   }
@@ -475,7 +475,7 @@ static void storeVectorToOneD(std::ostream &os, const std::string &vecM,
     assert(false && "FIXME: implement this in the future");
   } else {
     auto typeInfo = *value->typeInfo;
-    os << "vse" << typeInfo.sew.to_string() << "_v_"
+    os << "__riscv_vse" << typeInfo.sew.to_string() << "_v_"
        << typeInfo.shortVectorTypeName << "_m(" << vecM << ", " << rawBase
        << ", " << vecVal << ", vl);\n";
   }
@@ -485,7 +485,7 @@ static void storeVectorToScalar(std::ostream &os, const std::string rawBase,
                                 const std::string &vec,
                                 const TypeInfo &typeInfo) {
   os << "*" << rawBase << "= "
-     << (typeInfo.typeClass == FLOAT ? "vfmv_f_s_" : "vmv_x_s_")
+     << (typeInfo.typeClass == FLOAT ? "__riscv_vfmv_f_s_" : "__riscv_vmv_x_s_")
      << typeInfo.shortVectorTypeName << "_" << typeInfo.shortScalarTypeName
      << "(" << vec << ");\n";
 }
@@ -698,7 +698,7 @@ struct CodeGenForVcpop : CodeGenForOperator {
   }
   void genVcpopOpString(const std::string &popcountStr,
                         const std::vector<std::string> &args) {
-    os << popcountStr << " += vcpop_m_b" << getBooleanSew(*op->typeInfo);
+    os << popcountStr << " += __riscv_vcpop_m_b" << getBooleanSew(*op->typeInfo);
     genIntrinsicFuncSuffix(os, op, args);
   }
   std::string getPopcountCounter() {
@@ -742,7 +742,7 @@ struct CodeGenForVfirst : CodeGenForOperator {
   }
   void genVfirstOpString(const std::string &first,
                          const std::vector<std::string> &args) {
-    os << first << " = vfirst_m_b" << getBooleanSew(*op->typeInfo);
+    os << first << " = __riscv_vfirst_m_b" << getBooleanSew(*op->typeInfo);
     genIntrinsicFuncSuffix(os, op, args);
   }
   void getLoopStart(const std::string &counter, const std::string &first,
@@ -788,9 +788,9 @@ struct CodeGenForVmsbfVmsifVmsof : CodeGenForOperator {
     int booleanSew = getBooleanSew(vlTypeInfo);
     os << "vbool" << booleanSew << "_t " << vecStored << " = ";
     if (hasMA(op)) {
-      os << "vmnot_m_b" << booleanSew << "(" << vecM << ", vl);\n";
+      os << "__riscv_vmnot_m_b" << booleanSew << "(" << vecM << ", vl);\n";
     } else {
-      os << "vmandn_mm_b" << booleanSew << "(" << vecMO << ", " << vecM
+      os << "__riscv_vmandn_mm_b" << booleanSew << "(" << vecMO << ", " << vecM
          << ", vl);\n";
     }
     return vecStored;
@@ -822,10 +822,10 @@ struct CodeGenForVmsbfVmsifVmsof : CodeGenForOperator {
         hasMask(op) ? op->opAttr & NoMaskedOff ? args[1] : args[2] : args[0];
     if (hasMask(op)) {
       auto vecM = args[0];
-      os << first << " = vfirst_m_b" << booleanSew << "_m(" << vecM << ", "
+      os << first << " = __riscv_vfirst_m_b" << booleanSew << "_m(" << vecM << ", "
          << vecVs2 << ", vl);\n";
     } else {
-      os << first << " = vfirst_m_b" << booleanSew << "(" << vecVs2
+      os << first << " = __riscv_vfirst_m_b" << booleanSew << "(" << vecVs2
          << ", vl);\n";
     }
   }
@@ -855,7 +855,7 @@ struct CodeGenForViota : CodeGenForOperator {
 
   void storeResult(const std::string &opResult, std::string &accumulateMask,
                    std::vector<std::string> &args) {
-    os << opResult << " = vadd_vx_" << vlTypeInfo.shortVectorTypeName
+    os << opResult << " = __riscv_vadd_vx_" << vlTypeInfo.shortVectorTypeName
        << getOpSuffix(op) + "(";
     if (hasNonmask(op)) {
       if (hasTU(op))
@@ -888,12 +888,12 @@ struct CodeGenForViota : CodeGenForOperator {
                      : hasTAMA(op) ? args[1]
                                     : args[2];
     if (hasNonmask(op))
-      os << accumulateMask << " += vcpop_m_b" << getBooleanSew(vlTypeInfo)
+      os << accumulateMask << " += __riscv_vcpop_m_b" << getBooleanSew(vlTypeInfo)
          << "(" << vecInputA << ", " << (haveTailPolicy(op) ? "tail_vl" : "vl")
          << ");\n";
     else {
       auto vecM = args[0];
-      os << accumulateMask << " += vcpop_m_b" << getBooleanSew(vlTypeInfo)
+      os << accumulateMask << " += __riscv_vcpop_m_b" << getBooleanSew(vlTypeInfo)
          << "_m(" << vecM << ", " << vecInputA << ", "
          << (haveTailPolicy(op) ? "tail_vl" : "vl") << ");\n";
     }
@@ -929,7 +929,7 @@ struct CodeGenForVid : CodeGenForOperator {
 
   void storeResult(const std::string &opResult, std::string &accumulateLength,
                    std::vector<std::string> &args) {
-    os << opResult << " = vadd_vx_" << vlTypeInfo.shortVectorTypeName
+    os << opResult << " = __riscv_vadd_vx_" << vlTypeInfo.shortVectorTypeName
        << getOpSuffix(op) + "(";
     if (hasNonmask(op)) {
       if (hasTU(op))
@@ -1162,12 +1162,12 @@ struct CodeGenForLoadStore : CodeGenForOperator {
       if (hasMask(op)) {
         auto vecM = ret[0];
         auto vecZero = getVectorFromConstant(os, 0, *inputIdx.second->typeInfo);
-        os << vecIdx << " = vremu_vx_"
+        os << vecIdx << " = __riscv_vremu_vx_"
            << inputIdx.second->typeInfo->shortVectorTypeName;
         os << "_m(" << vecM << ", " << vecZero << ", " << vecIdx << ", "
            << opOutput.second->length << ", vl);\n";
       } else {
-        os << vecIdx << " = vremu_vx_"
+        os << vecIdx << " = __riscv_vremu_vx_"
            << inputIdx.second->typeInfo->shortVectorTypeName;
         os << "(" << vecIdx << ", " << opOutput.second->length << ", vl);\n";
       }
@@ -1175,7 +1175,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
     os << "}\n";
 
     // Align the index with sew of the operator
-    os << vecIdx << " = vmul_vx_"
+    os << vecIdx << " = __riscv_vmul_vx_"
        << inputIdx.second->typeInfo->shortVectorTypeName << "(" << vecIdx
        << ", " << op->typeInfo->sew.to_int() / 8 << ", vl);\n";
 
