@@ -129,9 +129,11 @@ def main(argv):
       print ('Init builtin metal-run')
       subprocess.run("git submodule update --init --recursive prebuilt/metal-run",
                      cwd=SRCTOP, shell=True)
-
-  gen_makefile(opts, "Makefile")
-  gen_rule_mk(opts, "rules.mk")
+  if opts.cc is None:
+    print ('Failed to generate makefile, Please set the compiler with v extension by --cc')
+  else:
+    gen_makefile(opts, "Makefile")
+    gen_rule_mk(opts, "rules.mk")
   return 0
 
 sys.exit(main(sys.argv[1:]))
