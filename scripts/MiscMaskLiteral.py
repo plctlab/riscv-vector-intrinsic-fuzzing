@@ -45,7 +45,7 @@ cpop_literal_mask_end = '''
 def include_literal(filename):
     return "#include\"" + filename + "\""
 
-def create_cpop_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_cpop_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += cpop_literal_start0 + op_type + cpop_literal_start1
   for i in range(input_num) :
@@ -54,7 +54,7 @@ def create_cpop_op(op_type, op_id, op_attr, output_type, input_num, input_types)
   var = chr(ord('a') + input_num)
   ret += "  auto " + var + " = static_cast<RIF::" + output_type + "Val *>(op->outputs[0]);\n"
   if "MaskedOperation" in op_attr :
-    ret += cpop_literal_mask_body + include_literal("v" + op_id + ".h") + cpop_literal_mask_end  
+    ret += cpop_literal_mask_body + include_literal("v" + op_id + ".h") + cpop_literal_mask_end
   else :
     ret += cpop_literal_nonmask_body + include_literal("v" + op_id + ".h") + cpop_literal_nonmask_end
   return ret
@@ -104,7 +104,7 @@ vfirst_literal_mask_end = '''
 }
 '''
 
-def create_vfirst_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_vfirst_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vfirst_literal_start0 + op_type + vfirst_literal_start1
   for i in range(input_num) :
@@ -113,7 +113,7 @@ def create_vfirst_op(op_type, op_id, op_attr, output_type, input_num, input_type
   var = chr(ord('a') + input_num)
   ret += "  auto " + var + " = static_cast<RIF::" + output_type + "Val *>(op->outputs[0]);\n"
   if "MaskedOperation" in op_attr :
-    ret += vfirst_literal_mask_body + include_literal("v" + op_id + ".h") + vfirst_literal_mask_end  
+    ret += vfirst_literal_mask_body + include_literal("v" + op_id + ".h") + vfirst_literal_mask_end
   else :
     ret += vfirst_literal_nonmask_body + include_literal("v" + op_id + ".h") + vfirst_literal_nonmask_end
   return ret
@@ -205,7 +205,7 @@ msbf_msif_msof_ma_literal_mask_end = '''
 }
 '''
 
-def create_msbf_msif_msof_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_msbf_msif_msof_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += msbf_msif_msof_literal_start0 + op_type + msbf_msif_msof_literal_start1
   for i in range(input_num) :
@@ -384,7 +384,7 @@ iota_tumu_literal_mask_end = '''
 }
 '''
 
-def create_iota_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_iota_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += iota_literal_start0 + op_type + iota_literal_start1
   for i in range(input_num) :
@@ -539,7 +539,7 @@ id_tumu_literal_mask_end = '''
 }
 '''
 
-def create_id_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_id_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += id_literal_start0 + op_type + id_literal_start1
   for i in range(input_num) :

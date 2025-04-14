@@ -103,7 +103,10 @@ def parseCustomOperatorDefinitions(filename) :
 
     code = code_gen_func(opdef_info.op_type, opdef_info.op_id, opdef_info.op_attr,
                          opdef_info.output_type,
-                         opdef_info.input_num, opdef_info.input_types)
+                         opdef_info.input_num,
+                         opdef_info.input_nfield,
+                         opdef_info.output_nfield,
+                         opdef_info.input_types)
 
     if len(code) == 0 :
       continue

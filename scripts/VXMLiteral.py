@@ -2,7 +2,7 @@ vxm_literal_start0 = "void compute"
 vxm_literal_start1 = "Op(RIF::OperatorBase *op) {\n"
 vxm_literal_body = '''
   if (op->opAttr & RIF::MergeOperation)
-    assert(a->length == b->length && c->length == 1 && a->length == d->length);
+    assert(a->length == c->length && b->length == 1 && a->length == d->length);
   else
     assert(b->length == 1 && a->length == c->length && a->length == d->length);
 
@@ -79,7 +79,7 @@ vxm_ta_literal_end = '''
 '''
 
 
-def create_vxm_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_vxm_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vxm_literal_start0 + op_type + vxm_literal_start1
   for i in range(input_num) :

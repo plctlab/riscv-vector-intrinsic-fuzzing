@@ -144,16 +144,16 @@ vx_ta_literal_nonmask_destructive_end = '''
 '''
 
 vx_literal_mask_body = '''
-  assert(a->length == b->length && a->length == c->length &&
-         a->length == e->length && d->length == 1);
+  // script/VXLiteral.py vx_literal_mask_body\n
+
+  assert(a->length == b->length && a->length == d->length && c->length == 1);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
-  auto dataMO = getRawPointer(b);
-  auto dataA = getRawPointer(c);
-  auto dataB = getRawPointer(d);
-  auto dataOut = getRawPointer(e);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
 
   auto sew = op->typeInfo->sew.to_int();
   P.VU.vsew = sew;
@@ -227,8 +227,9 @@ vx_literal_mask_destructive_body = '''
 '''
 
 vx_literal_mask_end = '''
-    } else
-      dataOut[i] = dataMO[i];
+//  } else
+//    dataOut[i] = dataMO[i];
+    }
   }
 }
 '''
@@ -433,7 +434,7 @@ vx_mu_literal_masked_no_masked_off_end = '''
 def include_literal(filename):
     return "#include\"" + filename + "\""
 
-def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vx_literal_start0 + op_type + vx_literal_start1
   for i in range(input_num) :
@@ -461,7 +462,7 @@ def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
       ret += vx_literal_nonmask_body + include_literal("v" + op_id + ".h") + vx_literal_nonmask_end
   return ret
 
-def create_destructive_vx_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_destructive_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vx_literal_start0 + op_type + vx_literal_start1
   for i in range(input_num) :
@@ -489,7 +490,7 @@ def create_destructive_vx_op(op_type, op_id, op_attr, output_type, input_num, in
       ret += vx_literal_nonmask_destructive_body + include_literal("v" + op_id + ".h") + vx_literal_nonmask_destructive_end
   return ret
 
-def create_masked_no_maskedoff_vx_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_masked_no_maskedoff_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vx_literal_start0 + op_type + vx_literal_start1
   for i in range(input_num) :

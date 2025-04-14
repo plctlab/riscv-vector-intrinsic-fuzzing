@@ -150,16 +150,15 @@ vv_ta_literal_nonmask_destructive_end = '''
 '''
 
 vv_literal_mask_body = '''
-  assert(a->length == b->length && a->length == c->length &&
-         a->length == e->length && a->length == d->length);
+  // scripts/VVLiteral.py vv_literal_mask_body
+  assert(a->length == b->length && a->length == c->length && a->length == d->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
-  auto dataMO = getRawPointer(b);
-  auto dataA = getRawPointer(c);
-  auto dataB = getRawPointer(d);
-  auto dataOut = getRawPointer(e);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
 
   auto sew = op->typeInfo->sew.to_int();
   auto dataASew = c->typeInfo->sew.to_int(); // for index load / store only
@@ -169,14 +168,15 @@ vv_literal_mask_body = '''
     if (dataM[i]) {
 '''
 
-vv_literal_mask_body_destructive = '''
+vv_literal_mask_body_destructive =  '''
+  // scripts/VVLiteral.py vv_literal_mask_body_destructive
   assert(a->length == b->length && a->length == c->length &&
          a->length == e->length && a->length == d->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
-  auto dataMO = getRawPointer(b);
+  // auto dataMO = getRawPointer(b);
   auto dataA = getRawPointer(b);
   auto dataB = getRawPointer(c);
   auto dataC = getRawPointer(d);
@@ -233,24 +233,6 @@ vv_literal_mask_body_destructive = '''
     if (dataM[i]) {
 '''
 
-vv_literal_mask_end = '''
-    } else
-      dataOut[i] = dataMO[i];
-  }
-}
-'''
-
-vv_ta_literal_mask_end = '''
-    } else
-      dataOut[i] = dataMO[i];
-  }
-  auto half = length / 2;
-  for (int i = half; i < length; ++i) {
-    dataOut[i] = -1;
-  }
-}
-'''
-
 vv_tu_literal_mask_end = '''
     } else
       dataOut[i] = dataMO[i];
@@ -263,8 +245,9 @@ vv_tu_literal_mask_end = '''
 '''
 
 vv_literal_mask_destructive_end = '''
-    } else
-      dataOut[i] = dataMO[i];
+    }
+    // else
+    //   dataOut[i] = dataMO[i];
   }
   #pragma pop_macro("VI_VFP_VV_LOOP")
   #pragma pop_macro("VI_VFP_VV_LOOP_WIDE")
@@ -436,7 +419,7 @@ vv_tumu_literal_mask_end = '''
 }
 '''
 
-def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vv_literal_start0 + op_type + vv_literal_start1
   for i in range(input_num) :
@@ -454,7 +437,7 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
     elif "TailUndisturbed" in op_attr and "MaskUndisturbed" in op_attr : # tumu
       ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_tumu_literal_mask_end
     else : # No explicit policy specified
-      ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_literal_mask_end
+      ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_ma_literal_masked_no_masked_off_end
   else :
     if "TailUndisturbed" in op_attr :
         ret += vv_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_tu_literal_nonmask_end
@@ -464,7 +447,7 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
       ret += vv_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_end
   return ret
 
-def create_destructive_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_destructive_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vv_literal_start0 + op_type + vv_literal_start1
   for i in range(input_num) :
@@ -492,7 +475,7 @@ def create_destructive_vv_op(op_type, op_id, op_attr, output_type, input_num, in
       ret += vv_literal_nonmask_destructive_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_destructive_end
   return ret
 
-def create_masked_no_maskedoff_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_masked_no_maskedoff_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vv_literal_start0 + op_type + vv_literal_start1
   for i in range(input_num) :
