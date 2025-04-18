@@ -299,7 +299,7 @@ v_literal_strided_store_mask_end = '''
 }
 '''
 
-def create_v_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_v_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += v_literal_start0 + op_type + v_literal_start1
   for i in range(input_num) :
@@ -327,7 +327,7 @@ def create_v_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
       ret += v_literal_nonmask_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
   return ret
 
-def create_no_input_v_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_no_input_v_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += v_literal_start0 + op_type + v_literal_start1
   for i in range(input_num) :
@@ -338,7 +338,7 @@ def create_no_input_v_op(op_type, op_id, op_attr, output_type, input_num, input_
   ret += v_literal_nonmask_no_input_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
   return ret
 
-def create_masked_no_maskedoff_v_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_masked_no_maskedoff_v_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += v_literal_start0 + op_type + v_literal_start1
   for i in range(input_num) :
@@ -349,7 +349,7 @@ def create_masked_no_maskedoff_v_op(op_type, op_id, op_attr, output_type, input_
   ret += v_literal_masked_no_maskedoff_body + include_literal("v" + op_id + ".h") + v_literal_masked_no_maskedoff_end
   return ret
 
-def create_strided_load_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_strided_load_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += v_literal_start0 + op_type + v_literal_start1
   for i in range(input_num) :
@@ -377,7 +377,7 @@ def create_strided_load_op(op_type, op_id, op_attr, output_type, input_num, inpu
       ret += v_literal_strided_load_nonmask_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
   return ret
 
-def create_strided_store_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_strided_store_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += v_literal_start0 + op_type + v_literal_start1
   for i in range(input_num) :
