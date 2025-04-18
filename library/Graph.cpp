@@ -24,14 +24,18 @@ struct OpDefinition {
   uint32_t opAttr;
   CustomValType outputType;
   int numOfInputs;
+  int input_nfield;
+  int output_nfield;
   std::vector<CustomValType> inputTypes;
   OpDefinition(CustomValType opType, std::string &&opTypeStr,
                std::string &&opId, int sew, TypeClass typeClass,
                uint32_t opAttr, CustomValType outputType, int numOfInputs,
+               int input_nfield, int output_nfield,
                std::vector<CustomValType> inputTypes)
       : opType(opType), opTypeStr(std::move(opTypeStr)), opId(std::move(opId)),
         sew(sew), typeClass(typeClass), opAttr(opAttr), outputType(outputType),
-        numOfInputs(numOfInputs), inputTypes(inputTypes) {}
+        numOfInputs(numOfInputs), input_nfield(input_nfield),
+        output_nfield(output_nfield), inputTypes(inputTypes) {}
 };
 
 bool Graph::isConstructedUseDefineCandidate = false;
@@ -49,11 +53,12 @@ void Graph::removeOperator(Operator *op) {
 
 static void getOpDefinitions() {
 #define CUSTOM_OP_TYPE(OP_TYPE, OP_ID, SEW, TYPE_CLASS, OP_ATTR, OUTPUT_TYPE,  \
-                       NUM_OF_INPUTS, ...)                                     \
+                       NUM_OF_INPUTS, INPUT_NFIELD, OUTPUT_NFIELD,...)         \
   {                                                                            \
     OpDefinition opDef{OP_TYPE,     #OP_TYPE,      std::string(#OP_ID),        \
                        SEW,         TYPE_CLASS,    OP_ATTR,                    \
-                       OUTPUT_TYPE, NUM_OF_INPUTS, {__VA_ARGS__}};             \
+                       OUTPUT_TYPE, NUM_OF_INPUTS, INPUT_NFIELD,               \
+                       OUTPUT_NFIELD, {__VA_ARGS__}};                          \
     opDefs.push_back(opDef);                                                   \
   }
 #include "CustomOperator.def"

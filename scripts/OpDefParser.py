@@ -9,10 +9,12 @@ class OpDefInfo:
   op_attr     = {}
   output_type = None
   input_num   = None
+  input_nfield = 1
+  output_nfield = 1
   input_types = []
 
   def __str__(self):
-    return "CUSTOM_OP_TYPE({op_type}, {op_id}, {type_class}, {op_attr}, {output_type}, {input_num}, {input_types})".format_map(self.__dict__)
+    return "CUSTOM_OP_TYPE({op_type}, {op_id}, {type_class}, {op_attr}, {output_type}, {input_num}, {input_nfield}, {output_nfield}, {input_types})".format_map(self.__dict__)
 
 # format:
 # CUSTOM_OP_TYPE(OP_TYPE, OP_ID, SEW, TYPE_CLASS, OP_ATTR, OUTPUT_TYPE,
@@ -34,8 +36,9 @@ def parse(path):
       op_def_info.op_attr = set(map(lambda x: x.strip(), args[4].split('|')))
       op_def_info.output_type = args[5]
       op_def_info.input_num = int(args[6])
-      op_def_info.input_types = args[7:]
-
+      op_def_info.input_nfield = int(args[7])
+      op_def_info.output_nfield = int(args[8])
+      op_def_info.input_types = args[9:]
       op_def_infos.append(op_def_info)
 
   return op_def_infos
