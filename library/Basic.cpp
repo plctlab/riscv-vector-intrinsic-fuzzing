@@ -162,8 +162,7 @@ ValueBase *getVs2(OperatorBase *op) {
       assert(hasNonmask(op));
       vs2 = hasTU(op) ? op->inputs[2] : op->inputs[1];
     } else
-      vs2 = hasMask(op)
-                ? (op->opAttr & NoMaskedOff ? op->inputs[1] : op->inputs[2])
+      vs2 = hasMask(op) ? op->inputs[1]
             : hasTU(op) ? op->inputs[1]
                         : op->inputs[0];
   }
@@ -252,9 +251,9 @@ void initializeLmul(OperatorBase *op) {
                                     vd->typeInfo->typeClass);
   }
 
-  auto maskedoff = getMaskedoff(op);
-  if (maskedoff)
-    maskedoff->typeInfo = vd->typeInfo;
+  // auto maskedoff = getMaskedoff(op);
+  // if (maskedoff)
+  //   maskedoff->typeInfo = vd->typeInfo;
 }
 
 bool ends_with(std::string const &value, std::string const &ending) {

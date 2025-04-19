@@ -119,7 +119,6 @@ void generateScalarInitCCode(std::ostream &os, ValueBase *value,
   auto scalar = static_cast<T *>(value);
   assert(scalar->length == 1);
   auto raw = scalar->raw;
-  os << " // generaed by library/Operator.cpp generateScalarInitCCode\n\t";
   if (isIntegral(value->dt)) {
     os << dataType << " tmp = ";
   } else {
@@ -318,7 +317,7 @@ std::string loadOneDToVector(std::ostream &os, ValueBase *value,
                              const std::string &holder, OperatorBase *op) {
   auto typeInfo = *value->typeInfo;
   std::string resultVec;
-  if (value->type == OneDBool) {
+  if (value->type == CustomValType::OneDBool) {
     std::string vecHolder = "vec_" + value->id;
     resultVec = getUniqueName("mask_" + value->id);
 
@@ -333,7 +332,7 @@ std::string loadOneDToVector(std::ostream &os, ValueBase *value,
 
     std::string lmulStr = LMUL_STR(static_cast<LmulType>(booleanLmul));
 
-    os << "vint8" << lmulStr << "_t " << vecHolder << " = __riscv_vle8_v_i8"
+    os << "\tvint8" << lmulStr << "_t " << vecHolder << " = __riscv_vle8_v_i8"
        << lmulStr << "(" << holder << ", vl);\n";
     os << "\tvbool" << booleanSew << "_t " << resultVec
        << " = __riscv_vmseq_vx_i8" << lmulStr << "_b" << booleanSew << "("
@@ -1523,7 +1522,6 @@ static void generateVVMVXMOperatorCode(std::ostream &os, OperatorBase *op) {
 // Operators with suffix vf2 / vf4 / vf8
 static void generateExtensionOperatorCode(std::ostream &os, OperatorBase *op) {
   ValueBase *vd = getVd(op);
-  ValueBase *maskedoff = getMaskedoff(op);
   ValueBase *vs2 = getVs2(op);
   ValueBase *vs1 = getVs1(op);
   assert(vd != nullptr);
@@ -1723,7 +1721,7 @@ void emitOneDVerificationCode<OneDFloat16Val>(std::ostream &os,
 
   os << "uint64_t tmp[] = {";
   for (int i = 0; i < length; ++i) {
-    os << std::to_string(fp16[i].v) << ",";
+    os << std::to_string(fp16[i].v) << ", ";
   }
   os << "};\n";
 
@@ -1825,7 +1823,7 @@ static void emitScalarVerificationCode(std::ostream &os, OperatorBase *op,
     os << "ll";
   if (output->dt == DataTypeEnum::Uint64_t)
     os << "ull";
-
+  os << ",";
   os << ";\n";
 
   os << "if(" << output->id << " != tmp) {\n";

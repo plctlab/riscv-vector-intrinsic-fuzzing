@@ -146,10 +146,15 @@ struct OperatorBase : ValueBase {
                const std::string &id, const OperatorAttrT opAttr,
                const unsigned numOfInputs,
                const std::initializer_list<CustomValType> inputTypes,
+               const unsigned input_nfield, const unsigned output_nfield,
                const CustomValType outputType, int dataWidth, LmulType lmul,
                TypeClass typeClass)
       : ValueBase(type, typeID, id, numOfInputs, typeClass, dataWidth, lmul),
+        input_nfield(input_nfield), output_nfield(output_nfield),
         opAttr(opAttr), inputTypes(inputTypes), outputType(outputType) {}
+        
+  const unsigned input_nfield;
+  const unsigned output_nfield;
 
   virtual ~OperatorBase() = default;
 
