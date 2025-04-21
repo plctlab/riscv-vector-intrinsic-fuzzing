@@ -16,3 +16,63 @@ jobs:
         cmake ..
         make -j $(nproc)
         ./tool/random_gen
+    - uses: actions/upload-artifact@v4
+      with:
+        name: built
+        path: build
+
+  test:
+    # needs: build
+    runs-on: ubuntu-latest
+    env:
+      COMPILER_TAG: '2025.04.21'
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [gcc, llvm]
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: download compiler with v extension release
+      id: download
+      uses: robinraju/release-downloader@v1
+      with:
+        repository: XYenChi/riscv-gnu-toolchain
+        tag: ${{env.COMPILER_TAG}}
+        fileName: 'riscv64-elf-ubuntu-24.04-${{matrix.compiler}}-nightly-${{env.COMPILER_TAG}}-nightly.tar.xz'
+
+    - name: extract compiler
+      run: |
+        tar -Jxvf "${{fromJson(steps.download.outputs.downloaded_files)[0]}}"
+        export PATH=$PWD/riscv/bin:$PATH
+        case "${{matrix.compiler}}" in
+          "gcc")
+            export CC="riscv64-unknown-elf-gcc";;
+          "llvm")
+            export CC="clang";;
+        esac
+
+    - uses: actions/download-artifact@v4
+      with:
+        path: build
+
+    - name: run ${{matrix.compiler}} test
+      run: |
+        export PATH=$PWD/riscv/bin:$PATH
+        case "${{matrix.compiler}}" in
+          "gcc")
+            export RVV_CC="riscv64-unknown-elf-gcc";;
+          "llvm")
+            export RVV_CC="clang";;
+        esac
+        env
+        cd test
+        ../rif-test --cc=$RVV_CC
+        make -j $(nproc) 2>&1 | tee ${{matrix.compiler}}_test.log
+    - uses: actions/upload-artifact@v4
+      with:
+        name: ${{matrix.compiler}}-test
+        path: |
+          /home/runner/work/riscv-vector-intrinsic-fuzzing/riscv-vector-intrinsic-fuzzing/test/*.log
+          /home/runner/work/riscv-vector-intrinsic-fuzzing/riscv-vector-intrinsic-fuzzing/test/*.c
+          /home/runner/work/riscv-vector-intrinsic-fuzzing/riscv-vector-intrinsic-fuzzing/test/Makefile
