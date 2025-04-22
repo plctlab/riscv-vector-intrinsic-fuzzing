@@ -150,16 +150,14 @@ vv_ta_literal_nonmask_destructive_end = '''
 '''
 
 vv_literal_mask_body = '''
-  assert(a->length == b->length && a->length == c->length &&
-         a->length == e->length && a->length == d->length);
+  assert(a->length == b->length && a->length == c->length && a->length == d->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
-  auto dataMO = getRawPointer(b);
-  auto dataA = getRawPointer(c);
-  auto dataB = getRawPointer(d);
-  auto dataOut = getRawPointer(e);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
 
   auto sew = op->typeInfo->sew.to_int();
   auto dataASew = c->typeInfo->sew.to_int(); // for index load / store only
