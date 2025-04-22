@@ -39,15 +39,13 @@ v_literal_nonmask_no_input_body = '''
 '''
 
 v_literal_mask_body = '''
-  assert(a->length == b->length && a->length == c->length &&
-         a->length == d->length);
+  assert(a->length == b->length && a->length == c->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
-  auto dataMO = getRawPointer(b);
-  auto dataA = getRawPointer(c);
-  auto dataOut = getRawPointer(d);
+  auto dataA = getRawPointer(b);
+  auto dataOut = getRawPointer(c);
 
   auto sew = op->typeInfo->sew.to_int();
 
@@ -79,8 +77,7 @@ v_tu_literal_nonmask_end = '''
 
 
 v_literal_mask_end = '''
-    } else
-      dataOut[i] = dataMO[i];
+    }
   }
 }
 '''
