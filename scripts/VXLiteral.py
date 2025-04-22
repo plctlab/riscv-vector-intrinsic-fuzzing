@@ -225,8 +225,7 @@ vx_literal_mask_destructive_body = '''
 '''
 
 vx_literal_mask_end = '''
-    } else
-      dataOut[i] = dataMO[i];
+    }
   }
 }
 '''
