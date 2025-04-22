@@ -168,17 +168,14 @@ vv_literal_mask_body = '''
 '''
 
 vv_literal_mask_body_destructive = '''
-  assert(a->length == b->length && a->length == c->length &&
-         a->length == e->length && a->length == d->length);
+  assert(a->length == b->length && c->length == 1 && a->length == d->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
-  auto dataMO = getRawPointer(b);
   auto dataA = getRawPointer(b);
   auto dataB = getRawPointer(c);
-  auto dataC = getRawPointer(d);
-  auto dataOut = getRawPointer(e);
+  auto dataOut = getRawPointer(d);
 
   auto sew = op->typeInfo->sew.to_int();
 
@@ -232,8 +229,7 @@ vv_literal_mask_body_destructive = '''
 '''
 
 vv_literal_mask_end = '''
-    } else
-      dataOut[i] = dataMO[i];
+    }
   }
 }
 '''
