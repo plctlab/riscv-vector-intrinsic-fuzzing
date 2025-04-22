@@ -2,7 +2,7 @@ vxm_literal_start0 = "void compute"
 vxm_literal_start1 = "Op(RIF::OperatorBase *op) {\n"
 vxm_literal_body = '''
   if (op->opAttr & RIF::MergeOperation)
-    assert(a->length == b->length && c->length == 1 && a->length == d->length);
+    assert(a->length == c->length && b->length == 1 && a->length == d->length);
   else
     assert(b->length == 1 && a->length == c->length && a->length == d->length);
 
