@@ -144,16 +144,14 @@ vx_ta_literal_nonmask_destructive_end = '''
 '''
 
 vx_literal_mask_body = '''
-  assert(a->length == b->length && a->length == c->length &&
-         a->length == e->length && d->length == 1);
+  assert(a->length == b->length && a->length == d->length && c->length == 1);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
-  auto dataMO = getRawPointer(b);
-  auto dataA = getRawPointer(c);
-  auto dataB = getRawPointer(d);
-  auto dataOut = getRawPointer(e);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
 
   auto sew = op->typeInfo->sew.to_int();
   P.VU.vsew = sew;
