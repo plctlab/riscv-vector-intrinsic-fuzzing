@@ -464,7 +464,7 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
       ret += vv_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_end
   return ret
 
-def create_destructive_vv_op(op_type, op_id, op_attr, output_type, input_num, input_types) :
+def create_destructive_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, output_nfield, input_types) :
   ret = ""
   ret += vv_literal_start0 + op_type + vv_literal_start1
   for i in range(input_num) :
