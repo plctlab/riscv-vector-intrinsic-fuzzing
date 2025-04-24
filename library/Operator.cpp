@@ -1480,7 +1480,6 @@ struct CodeGenForLoadStore : CodeGenForOperator {
 // Single input operator (e.g. op_id with suffux _v, _f, _x, ...)
 static void generateVOperatorCode(std::ostream &os, OperatorBase *op) {
   ValueBase *vd = getVd(op);
-  ValueBase *maskedoff = getMaskedoff(op);
   ValueBase *vs2 = getVs2(op);
   assert(getVs1(op) == nullptr);
   assert(vd != nullptr);
@@ -1501,7 +1500,6 @@ static void generateLoadStoreOperatorCode(std::ostream &os, OperatorBase *op) {
 // Nonmasked VV / VX operation
 static void generateVVOrVXOperatorCode(std::ostream &os, OperatorBase *op) {
   ValueBase *vd = getVd(op);
-  ValueBase *maskedoff = getMaskedoff(op);
   ValueBase *vs2 = getVs2(op);
   ValueBase *vs1 = getVs1(op);
   assert(vs2 != nullptr);
@@ -1514,11 +1512,8 @@ static void generateVVOrVXOperatorCode(std::ostream &os, OperatorBase *op) {
 
 static void generateMulAddOperatorCode(std::ostream &os, OperatorBase *op) {
   ValueBase *vd = getVd(op);
-  ValueBase *maskedoff = getMaskedoff(op);
   ValueBase *vs2 = getVs2(op);
   ValueBase *vs1 = getVs1(op);
-  if (!(op->opAttr & NoMaskedOff))
-    assert(maskedoff != nullptr);
   assert(vs2 != nullptr);
   assert(vs1 != nullptr);
   assert(vd != nullptr);
@@ -1539,7 +1534,6 @@ static void generateVVMVXMOperatorCode(std::ostream &os, OperatorBase *op) {
 // Operators with suffix vf2 / vf4 / vf8
 static void generateExtensionOperatorCode(std::ostream &os, OperatorBase *op) {
   ValueBase *vd = getVd(op);
-  ValueBase *maskedoff = getMaskedoff(op);
   ValueBase *vs2 = getVs2(op);
   ValueBase *vs1 = getVs1(op);
   assert(vd != nullptr);
