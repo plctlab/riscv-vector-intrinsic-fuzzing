@@ -251,10 +251,6 @@ void initializeLmul(OperatorBase *op) {
     vd->typeInfo = TypeInfo::create(LmulType::m1, vd->typeInfo->sew,
                                     vd->typeInfo->typeClass);
   }
-
-  auto maskedoff = getMaskedoff(op);
-  if (maskedoff)
-    maskedoff->typeInfo = vd->typeInfo;
 }
 
 bool ends_with(std::string const &value, std::string const &ending) {
