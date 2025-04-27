@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstring>
+#include <iostream>
 #include <map>
 #include <ostream>
 #include <random>
@@ -1717,10 +1718,43 @@ static void emitOneDVerificationCode(std::ostream &os, OperatorBase *op,
   }
   os << "};\n";
 
-  os << "for (int i=0; i<" << length << ";++i)\n";
-  os << "if(" << output->id << "[i] != tmp[i]) {\n\treturn 0;\n}\n";
-
-  os << "\treturn 1;\n";
+  os << "\tint counter = 0;\n";
+  os << "\tfor (int i=0; i<" << length << ";++i)\n";
+  os << "\t{\n";
+  os << "\t\tif(" << output->id << "[i] != tmp[i])\n";
+  os << "\t\t{\n";
+  os << "\t\t\tcounter++;\n";
+  os << "\t\t\tprintf(\"FAILED VALUE:";
+  os << output->id;
+  os << "[\%d] = ";
+  if (output->dt == DataTypeEnum::Int64_t || output->dt == DataTypeEnum::Uint64_t)
+    os << "\%ld, tmp:\%ld\\n\"";
+  else
+    os << "\%d, tmp:\%d\\n\"";
+  os << ", i, ";
+  os << output->id;
+  os <<"[i], tmp[i]);\n";
+  os << "\t\t}\n";
+  os << "\t}\n";
+  os << "\tif(counter > 0)\n";
+  os << "\t{\n";
+  os << "\t\tfor (int i=0; i<" << length << ";++i)\n";
+  os << "\t\t\tprintf(\"";
+  os << output->id;
+  os << "[\%d] = ";
+  if (output->dt == DataTypeEnum::Int64_t || output->dt == DataTypeEnum::Uint64_t)
+    os << "\%ld, tmp:\%ld\\n\"";
+  else
+    os << "\%d, tmp:\%d\\n\"";
+  os << ", i, ";
+  os << output->id;
+  os <<"[i], tmp[i]);\n";
+  os << "\t\treturn 0;\n";
+  os << "\t}\n";
+  os << "\telse\n";
+  os << "\t{\n";
+  os << "\t\treturn 1;\n";
+  os << "\t}\n";
 }
 
 template <>
