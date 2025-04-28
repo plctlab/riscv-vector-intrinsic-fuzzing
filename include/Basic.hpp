@@ -138,6 +138,7 @@ enum OperatorAttr : OperatorAttrT {
   TailUndisturbed = 1 << 17,
   MaskAgnostic = 1 << 18,
   MaskUndisturbed = 1 << 19,
+  AddWithCarry = 1 << 20,
 };
 
 struct OperatorBase : ValueBase {
