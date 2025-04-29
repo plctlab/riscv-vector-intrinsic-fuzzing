@@ -341,24 +341,10 @@ std::string loadOneDToVector(std::ostream &os, ValueBase *value,
        << " = __riscv_vmseq_vx_i8" << lmulStr << "_b" << booleanSew << "("
        << vecHolder << ", 1, vl);\n";
   } else { // normal
-    std::string sew =
-        (op->opAttr & WideningOperation || op->opAttr & NarrowingOperation)
-            ? getVs2(op)->typeInfo->sew.to_string()
-            : typeInfo.sew.to_string();
-    std::string vectorTypeName =
-        (op->opAttr & WideningOperation ||
-         op->opAttr & NarrowingOperation)
-            ? getVs2(op)->typeInfo->vectorTypeName
-            : typeInfo.vectorTypeName;
-    std::string shortVectorTypeName =
-        (op->opAttr & WideningOperation ||
-         op->opAttr & NarrowingOperation)
-            ? getVs2(op)->typeInfo->shortVectorTypeName
-            : typeInfo.shortVectorTypeName;
     resultVec = getUniqueName("vec_" + value->id);
-    os << "\t" << vectorTypeName << " " << resultVec
-       << " = __riscv_vle" << sew << "_v_"
-       << shortVectorTypeName << "(" << holder << ", vl);\n";
+    os << typeInfo.vectorTypeName << " " << resultVec << "= __riscv_vle"
+       << typeInfo.sew.to_string() << "_v_" << typeInfo.shortVectorTypeName
+       << "(" << holder << ", vl);\n";
   }
   return resultVec;
 }
