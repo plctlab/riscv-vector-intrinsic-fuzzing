@@ -168,14 +168,15 @@ vv_literal_mask_body = '''
 '''
 
 vv_literal_mask_body_destructive = '''
-  assert(a->length == b->length && c->length == 1 && a->length == d->length);
+  assert(a->length == b->length && a->length == c->length && a->length == d->length && b->length == e->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
   auto dataA = getRawPointer(b);
   auto dataB = getRawPointer(c);
-  auto dataOut = getRawPointer(d);
+  auto dataC = getRawPointer(d);
+  auto dataOut = getRawPointer(e);
 
   auto sew = op->typeInfo->sew.to_int();
 
