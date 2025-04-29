@@ -274,7 +274,6 @@ void Graph::generateCCode(std::ostream &os, uint32_t seed) {
     if (op->type != Initialize)
       initializeLmul(op);
     os << "void " << op->getNameWithType() << "() {\n";
-    os << "// getNameWithType \n";
     op->generateCCode(os);
     os << "}\n";
   }
@@ -318,7 +317,6 @@ void Graph::generateCCode(std::ostream &os, uint32_t seed) {
   os << "int ret = 1; // 1 = success\n";
   for (auto id : ordering) {
     auto op = operatorLUT[id];
-    os << "// operatorLUT[id] = " << operatorLUT[id] << "\n";
     os << "ret &= golden_" << op->getNameWithType() << "();\n";
   }
   os << "if (!ret) return 1;\n";
