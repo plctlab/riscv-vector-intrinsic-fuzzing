@@ -333,7 +333,7 @@ std::string loadOneDToVector(std::ostream &os, ValueBase *value,
 
     std::string lmulStr = LMUL_STR(static_cast<LmulType>(booleanLmul));
 
-    os << "vint8" << lmulStr << "_t " << vecHolder << " = __riscv_vle8_v_i8"
+    os << "\tvint8" << lmulStr << "_t " << vecHolder << " = __riscv_vle8_v_i8"
        << lmulStr << "(" << holder << ", vl);\n";
     os << "\tvbool" << booleanSew << "_t " << resultVec
        << " = __riscv_vmseq_vx_i8" << lmulStr << "_b" << booleanSew << "("
@@ -686,22 +686,19 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
         if (hasTA(op)) {
           // TODO: find which parameter to delete.the "" is written by me to
           // find which condition the vredxor belongs to
-          args = {"loaded.size() == 1|hasTA(op)|loaded[0]", vecReduction};
+          args = {loaded[0], vecReduction};
         } else {
-          args = {vecReduction, "loaded.size() == 1|loaded[0]", vecReduction};
+	args = {vecReduction, loaded[0], vecReduction};
           // the intrinsic function pa
         }
       } else if (loaded.size() == 2) {
         if (hasTA(op) || hasTU(op)) { // tu or tam
-          args = {"loaded.size() == 2|hasTA(op)|loaded[0]", loaded[1],
-                  vecReduction};
+	args = {loaded[0], loaded[1], vecReduction};
         } else { // normal _m
-          args = {"loaded.size() == 2|loaded[0]", vecReduction, loaded[1],
-                  vecReduction};
+	args = {loaded[0], vecReduction, loaded[1], vecReduction};
         }
       } else if (loaded.size() == 3) { // tum
-        args = {"loaded.size() == 3|loaded[0]", loaded[1], loaded[2],
-                vecReduction};
+        args = {loaded[0], loaded[1], loaded[2], vecReduction};
       }
 
       genReductionOpString(os, op, vecReduction, args);
