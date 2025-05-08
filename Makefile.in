@@ -1,5 +1,5 @@
 SRCTOP:={SRCTOP}
-CC:={CC}
+RVCC:={CC}
 CFLAGS:={CFLAGS}
 SIM:={SIM}
 NODE:={NODE}
@@ -57,7 +57,7 @@ run: $(SIM_LOGS)
         fi
 	$(V)echo "Compile $(subst .log,,$@)"
 	$(V)$(call cmd, \
-	      $(CC) $(CFLAGS) $(EXTRA_CFLAGS) \
+	      $(RVCC) $(CFLAGS) $(EXTRA_CFLAGS) \
 	      $(subst .log,.c,$@) \
 	      -o $(subst .log,.elf,$@) \
 	      , "COMPILE FAIL")
