@@ -63,7 +63,7 @@ run: $(SIM_LOGS)
 	      , "COMPILE FAIL")
 	$(V)echo "Run $(subst .log,,$@)"
 	$(V)$(call cmd, \
-              $(SIM) $(subst .log,.elf,$@) \
+              $(SIM) --fill-vector-agnostic-to-1 $(subst .log,.elf,$@) \
               , "RUN FAIL")
 
 $(GEN):
