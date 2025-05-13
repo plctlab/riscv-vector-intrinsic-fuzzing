@@ -260,6 +260,8 @@ vv_tu_literal_mask_end = '''
 '''
 
 vv_literal_mask_destructive_end = '''
+    }else{
+      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
     }
   }
   #pragma pop_macro("VI_VFP_VV_LOOP")
