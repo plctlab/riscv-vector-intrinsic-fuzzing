@@ -231,6 +231,7 @@ vv_literal_mask_body_destructive = '''
 
 vv_literal_mask_end = '''
     }
+      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
   }
 }
 '''
