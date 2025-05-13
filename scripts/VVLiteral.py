@@ -237,6 +237,14 @@ vv_literal_mask_end = '''
 }
 '''
 
+vv_literal_mask_bool_end= '''
+    }else {
+      dataOut[i] = 1;
+    }
+  }
+}
+'''
+
 vv_ta_literal_mask_end = '''
     } else
       dataOut[i] = dataMO[i];
@@ -452,7 +460,10 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
     elif "TailUndisturbed" in op_attr and "MaskUndisturbed" in op_attr : # tumu
       ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_tumu_literal_mask_end
     else : # No explicit policy specified
-      ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_literal_mask_end
+      if output_type == "OneDBool":
+        ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_literal_mask_bool_end
+      else:
+        ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_literal_mask_end
   else :
     if "TailUndisturbed" in op_attr :
         ret += vv_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_tu_literal_nonmask_end
