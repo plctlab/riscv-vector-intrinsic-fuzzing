@@ -225,8 +225,9 @@ vx_literal_mask_destructive_body = '''
 '''
 
 vx_literal_mask_end = '''
-    }else
-    memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+    }else{
+      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+    }
   }
 }
 '''
