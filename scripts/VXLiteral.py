@@ -235,7 +235,6 @@ vx_literal_mask_end = '''
 vx_literal_mask_bool_end= '''
     }else {
       dataOut[i] = 1;
-    }
   }
 }
 '''
