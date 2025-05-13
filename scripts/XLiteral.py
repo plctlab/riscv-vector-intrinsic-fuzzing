@@ -107,7 +107,7 @@ x_tama_literal_mask_body = '''
 
 x_literal_mask_end = '''
     } else {
-      dataOut[i] = dataMO[i];
+      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
     }
   }
   #pragma pop_macro("VI_VF_MERGE_LOOP")
