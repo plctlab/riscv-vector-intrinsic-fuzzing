@@ -232,6 +232,14 @@ vx_literal_mask_end = '''
 }
 '''
 
+vx_literal_mask_bool_end= '''
+    }else {
+      dataOut[i] = 1;
+    }
+  }
+}
+'''
+
 vx_ta_literal_mask_end = '''
     } else
       dataOut[i] = dataMO[i];
@@ -255,8 +263,9 @@ vx_tu_literal_mask_end = '''
 '''
 
 vx_literal_mask_destructive_end = '''
-    } else
-      dataOut[i] = dataMO[i];
+    }else{
+      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+    }
   }
   #pragma pop_macro("VI_VFP_VF_LOOP")
   #pragma pop_macro("VI_VFP_VF_LOOP_WIDE")
@@ -450,7 +459,10 @@ def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
     elif "TailUndisturbed" in op_attr and "MaskUndisturbed" in op_attr : # tumu
       ret += vx_literal_mask_body + include_literal("v" + op_id + ".h") + vx_tumu_literal_mask_end
     else : # No explicit policy specified
-      ret += vx_literal_mask_body + include_literal("v" + op_id + ".h") + vx_literal_mask_end
+      if output_type == "OneDBool":
+        ret += vx_literal_mask_body + include_literal("v" + op_id + ".h") + vx_literal_mask_bool_end
+      else:
+        ret += vx_literal_mask_body + include_literal("v" + op_id + ".h") + vx_literal_mask_end
   else :
     if "TailUndisturbed" in op_attr :
       ret += vx_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + vx_tu_literal_nonmask_end
