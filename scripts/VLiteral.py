@@ -77,6 +77,8 @@ v_tu_literal_nonmask_end = '''
 
 
 v_literal_mask_end = '''
+    }else {
+      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
     }
   }
 }
