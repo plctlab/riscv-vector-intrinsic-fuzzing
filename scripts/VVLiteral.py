@@ -149,6 +149,25 @@ vv_ta_literal_nonmask_destructive_end = '''
 }
 '''
 
+
+vv_literal_nonmask_vxrm_body = '''
+// scripts/VVLiteral.py vv_literal_nonmask_vxrm_body
+  assert(a->length == b->length && a->length == d->length);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataB = getRawPointer(b);
+  auto dataC = getRawPointer(c);// c means frm
+  auto dataOut = getRawPointer(d);
+
+  auto sew = op->typeInfo->sew.to_int();
+  auto dataASew = a->typeInfo->sew.to_int(); // for index load / store only
+  P.VU.vsew = sew;
+
+  for (int i = 0; i < length; ++i) {
+'''
+
 vv_literal_mask_body = '''
   assert(a->length == b->length && a->length == c->length && a->length == d->length);
 
@@ -329,6 +348,23 @@ vv_tumu_literal_mask_destructive_end = '''
 }
 '''
 
+vv_literal_masked_no_maskedoff_vxrm_body = '''
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataC = getRawPointer(d); // dataC is vxrm
+  auto dataOut = getRawPointer(e);
+
+  auto sew = op->typeInfo->sew.to_int();
+  auto dataASew = b->typeInfo->sew.to_int(); // for index load / store only
+  P.VU.vsew = sew;
+
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
 vv_literal_masked_no_maskedoff_body = '''
   auto length = a->length;
 
@@ -453,6 +489,8 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
   if "MaskedOperation" in op_attr :
     if "TailAgnostic" in op_attr and "MaskAgnostic" in op_attr : # tama
       ret += vv_literal_masked_no_maskedoff_body + include_literal("v" + op_id + ".h") + vv_tama_literal_mask_end
+    elif "VXRM" in op_attr : # vxrm
+      ret += vv_literal_masked_no_maskedoff_vxrm_body + include_literal("v" + op_id + ".h") + vv_literal_mask_end
     elif "TailAgnostic" in op_attr and "MaskUndisturbed" in op_attr : # tamu
       ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_tamu_literal_mask_end
     elif "TailUndisturbed" in op_attr and "MaskAgnostic" in op_attr : # tuma
@@ -469,6 +507,8 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
         ret += vv_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_tu_literal_nonmask_end
     elif "TailAgnostic" in op_attr :
         ret += vv_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_ta_literal_nonmask_end
+    elif "VXRM" in op_attr :
+        ret += vv_literal_nonmask_vxrm_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_end
     else :
       ret += vv_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_end
   return ret
