@@ -160,6 +160,45 @@ vx_literal_mask_body = '''
     if (dataM[i]) {
 '''
 
+vx_literal_mask_vxrm_body = '''
+  // script/VXLiteral.py vx_literal_mask_frm_body\n
+  assert(a->length == b->length && c->length == 1 &&
+         a->length == e->length);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);  // mask
+  auto dataA = getRawPointer(b);  // vs2
+  auto dataB = getRawPointer(c);  //rs1
+  // d means vxrm
+  auto dataOut = getRawPointer(e);
+
+  auto sew = op->typeInfo->sew.to_int();
+  P.VU.vsew = sew;
+
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
+
+vx_literal_nonmask_vxrm_body = '''
+  // script/VXLiteral.py vx_literal_nonmask_vxrm_body\n
+  // vasub_vx
+  assert(a->length == d->length == 1 && b->length == 1);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataB = getRawPointer(b);
+  // c means vxrm
+  auto dataOut = getRawPointer(d);
+
+  auto sew = op->typeInfo->sew.to_int();
+  P.VU.vsew = sew;
+
+  for (int i = 0; i < length; ++i) {
+'''
+
 vx_literal_mask_destructive_body = '''
   assert(a->length == b->length && a->length == d->length &&
           a->length == e->length && c->length == 1);
@@ -452,6 +491,8 @@ def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
   if "MaskedOperation" in op_attr :
     if "TailAgnostic" in op_attr and "MaskAgnostic" in op_attr : # tama
       ret += vx_literal_masked_no_maskedoff_body + include_literal("v" + op_id + ".h") + vx_tama_literal_mask_end
+    elif "VXRM" in op_attr :
+      ret += vx_literal_mask_vxrm_body + "\t" +include_literal("v" + op_id + ".h") + vx_literal_mask_end
     elif "TailAgnostic" in op_attr and "MaskUndisturbed" in op_attr : # tamu
       ret += vx_literal_mask_body + include_literal("v" + op_id + ".h") + vx_tamu_literal_mask_end
     elif "TailUndisturbed" in op_attr and "MaskAgnostic" in op_attr : # tuma
@@ -466,6 +507,8 @@ def create_vx_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
   else :
     if "TailUndisturbed" in op_attr :
       ret += vx_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + vx_tu_literal_nonmask_end
+    elif "VXRM" in op_attr :
+      ret += vx_literal_nonmask_vxrm_body + "\t" +include_literal("v" + op_id + ".h") + vx_literal_nonmask_end
     elif "TailAgnostic" in op_attr :
       ret += vx_literal_nonmask_body + include_literal("v" + op_id + ".h") + vx_ta_literal_nonmask_end
     else :
