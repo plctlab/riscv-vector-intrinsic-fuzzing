@@ -604,6 +604,34 @@ void CodeGenForOperator::generateSingleOperatorCode() {
   auto output = op->outputs[0];
   getRawPointers(op->inputs, output);
   os << "\n";
+  if (op->opAttr & VXRM){
+    if (op->opAttr & MaskedOperation){
+      os << "#if " << op->inputs[3]->id << " == 0\n";
+      os << "\t" << "#define " << opInputs[3].first << " 0\n";
+      os << "#elif " << op->inputs[3]->id << " == 1\n";
+      os << "\t" << "#define " << opInputs[3].first << " 1\n";
+      os << "#elif " << op->inputs[3]->id << " == 2\n";
+      os << "\t" << "#define " << opInputs[3].first << " 2\n";
+            os << "#elif " << op->inputs[3]->id << " == 3\n";
+      os << "\t" << "#define " << opInputs[3].first << " 3\n";
+      os << "#else\n";
+      os << "\t" << "#error \"VXRM VALUE should be [0:3]\"\n";
+      os << "#endif\n";
+    }else{
+      os << "#if " << op->inputs[2]->id << " == 0\n";
+      os << "\t" << "#define " << opInputs[2].first << " 0\n";
+      os << "#elif " << op->inputs[2]->id << " == 1\n";
+      os << "\t" << "#define " << opInputs[2].first << " 1\n";
+      os << "#elif " << op->inputs[2]->id << " == 2\n";
+      os << "\t" << "#define " << opInputs[2].first << " 2\n";
+      os << "#elif " << op->inputs[2]->id << " == 3\n";
+      os << "\t" << "#define " << opInputs[2].first << " 3\n";
+      os << "#else\n";
+      os << "\t" << "#error \"VXRM VALUE should be [0:3]\"\n";
+      os << "#endif\n";
+      }
+    }
+
   std::string counter = CodeGenForOperator::getCounter(os, loopLength);
   CodeGenForOperator::getLoopStart(os, counter);
   {
