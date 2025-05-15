@@ -170,7 +170,7 @@ vx_literal_mask_vxrm_body = '''
   auto dataM = getRawPointer(a);  // mask
   auto dataA = getRawPointer(b);  // vs2
   auto dataB = getRawPointer(c);  //rs1
-  // d means vxrm
+  auto dataC = getRawPointer(d);  // d means vxrm
   auto dataOut = getRawPointer(e);
 
   auto sew = op->typeInfo->sew.to_int();
@@ -190,7 +190,7 @@ vx_literal_nonmask_vxrm_body = '''
 
   auto dataA = getRawPointer(a);
   auto dataB = getRawPointer(b);
-  // c means vxrm
+  auto dataC = getRawPointer(c);  // c means vxrm
   auto dataOut = getRawPointer(d);
 
   auto sew = op->typeInfo->sew.to_int();
