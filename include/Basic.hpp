@@ -139,6 +139,7 @@ enum OperatorAttr : OperatorAttrT {
   MaskAgnostic = 1 << 18,
   MaskUndisturbed = 1 << 19,
   AddWithCarry = 1 << 20,
+  VXRM = 1 << 21,
 };
 
 struct OperatorBase : ValueBase {
@@ -241,6 +242,7 @@ ValueBase *getMask(OperatorBase *op);
 ValueBase *getMaskedoff(OperatorBase *op);
 ValueBase *getVs2(OperatorBase *op);
 ValueBase *getVs1(OperatorBase *op);
+ValueBase *getRoundingMode(OperatorBase *op);
 
 /*
 Set all inputs/outputs to LMUL of `op`.
