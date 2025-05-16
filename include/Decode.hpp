@@ -238,9 +238,9 @@ typedef unsigned __int128 uint128_t;
   BODY
 
 #define VI_VF_MERGE_LOOP(BODY)                                                 \
-  bool use_first = dataA[i];                                                   \
-  RIF::RawDatumOperand vs2(dataB[i]);                                          \
-  RIF::RawDatumOperand rs1(*dataC);                                            \
+  bool use_first = dataC[i];                                                   \
+  RIF::RawDatumOperand vs2(dataA[i]);                                          \
+  RIF::RawDatumOperand rs1(*dataB);                                            \
   RIF::RawDatumOperand vd;                                                     \
   BODY;                                                                        \
   dataOut[i] = vd;
