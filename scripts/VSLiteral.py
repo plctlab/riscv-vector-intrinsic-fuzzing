@@ -14,6 +14,7 @@ vs_literal_nonmask_body = '''
 '''
 
 vs_ta_literal_nonmask_body = '''
+// scripts/VSLiteral.py
   assert(a->length == b->length);
 
   auto length = a->length;
@@ -114,7 +115,8 @@ def include_literal(filename):
     return "#include\"" + filename + "\""
 
 vs_literal_mask_end = '''
-    }
+    }else { // maskedoff element is agnostic
+      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
   }
 }
 '''
