@@ -140,6 +140,7 @@ enum OperatorAttr : OperatorAttrT {
   MaskUndisturbed = 1 << 19,
   AddWithCarry = 1 << 20,
   VXRM = 1 << 21,
+  FRM = 1 << 22,
 };
 
 struct OperatorBase : ValueBase {
