@@ -489,7 +489,7 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
   if "MaskedOperation" in op_attr :
     if "TailAgnostic" in op_attr and "MaskAgnostic" in op_attr : # tama
       ret += vv_literal_masked_no_maskedoff_body + include_literal("v" + op_id + ".h") + vv_tama_literal_mask_end
-    elif "VXRM" in op_attr : # vxrm
+    elif "VXRM" in op_attr or "FRM" in op_attr: # vxrm
       ret += vv_literal_masked_no_maskedoff_vxrm_body + include_literal("v" + op_id + ".h") + vv_literal_mask_end
     elif "TailAgnostic" in op_attr and "MaskUndisturbed" in op_attr : # tamu
       ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_tamu_literal_mask_end
@@ -507,7 +507,7 @@ def create_vv_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
         ret += vv_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_tu_literal_nonmask_end
     elif "TailAgnostic" in op_attr :
         ret += vv_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_ta_literal_nonmask_end
-    elif "VXRM" in op_attr :
+    elif "VXRM" in op_attr or "FRM" in op_attr:
         ret += vv_literal_nonmask_vxrm_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_end
     else :
       ret += vv_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_end
