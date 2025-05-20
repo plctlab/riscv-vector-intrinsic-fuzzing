@@ -1,6 +1,7 @@
 v_literal_start0 = "void compute"
 v_literal_start1 = "Op(RIF::OperatorBase *op) {\n"
 v_literal_nonmask_body = '''
+// scripts/VLiteral.py
   assert(a->length == b->length);
 
   auto length = a->length;
@@ -9,6 +10,20 @@ v_literal_nonmask_body = '''
   auto dataOut = getRawPointer(b);
 
   auto sew = op->typeInfo->sew.to_int();
+
+  for (int i = 0; i < length; ++i) {
+'''
+
+v_literal_nonmask_narrow_body = '''
+// scripts/VLiteral.py
+  assert(a->length == b->length);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataOut = getRawPointer(b);
+
+  auto sew = getVs2(op)->typeInfo->sew.to_int();
 
   for (int i = 0; i < length; ++i) {
 '''
@@ -48,6 +63,21 @@ v_literal_mask_body = '''
   auto dataOut = getRawPointer(c);
 
   auto sew = op->typeInfo->sew.to_int();
+
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
+v_literal_mask_narrow_body = '''
+  assert(a->length == b->length && a->length == c->length);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataA = getRawPointer(b);
+  auto dataOut = getRawPointer(c);
+
+  auto sew = getVs2(op)->typeInfo->sew.to_int();
 
   for (int i = 0; i < length; ++i) {
     if (dataM[i]) {
@@ -315,6 +345,8 @@ def create_v_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, o
       ret += v_literal_mask_body + include_literal("v" + op_id + ".h") + v_tuma_literal_mask_end
     elif "TailUndisturbed" in op_attr and "MaskUndisturbed" in op_attr : # tumu
       ret += v_literal_mask_body + include_literal("v" + op_id + ".h") + v_tumu_literal_mask_end
+    elif "ncvt" in op_id or "wcvt" in op_id:
+      ret += v_literal_mask_narrow_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
     else : # No explicit policy specified
       ret += v_literal_mask_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
   else :
@@ -322,6 +354,8 @@ def create_v_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, o
         ret += v_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + v_tu_literal_nonmask_end
     elif "TailAgnostic" in op_attr :
         ret += v_literal_nonmask_body + include_literal("v" + op_id + ".h") + v_ta_literal_nonmask_end
+    elif "ncvt" in op_id or "wcvt" in op_id:
+      ret += v_literal_nonmask_narrow_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
     else :
       ret += v_literal_nonmask_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
   return ret
