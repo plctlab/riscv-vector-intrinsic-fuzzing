@@ -1,7 +1,7 @@
 v_literal_start0 = "void compute"
 v_literal_start1 = "Op(RIF::OperatorBase *op) {\n"
 v_literal_nonmask_body = '''
-// scripts/VLiteral.py
+// scripts/VLiteral.py v_literal_nonmask_body
   assert(a->length == b->length);
 
   auto length = a->length;
@@ -14,14 +14,44 @@ v_literal_nonmask_body = '''
   for (int i = 0; i < length; ++i) {
 '''
 
+v_literal_nonmask_frm_body = '''
+// scripts/VLiteral.py v_literal_nonmask_frm_body
+  assert(a->length == c->length);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataB = getRawPointer(b); // frm
+  auto dataOut = getRawPointer(c);
+
+  auto sew = op->typeInfo->sew.to_int();
+
+  for (int i = 0; i < length; ++i) {
+'''
+
 v_literal_nonmask_narrow_body = '''
-// scripts/VLiteral.py
+// scripts/VLiteral.py v_literal_nonmask_narrow_body
   assert(a->length == b->length);
 
   auto length = a->length;
 
   auto dataA = getRawPointer(a);
   auto dataOut = getRawPointer(b);
+
+  auto sew = getVs2(op)->typeInfo->sew.to_int();
+
+  for (int i = 0; i < length; ++i) {
+'''
+
+v_literal_nonmask_narrow_frm_body = '''
+// scripts/VLiteral.py v_literal_nonmask_narrow_frm_body
+  assert(a->length == c->length);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataB = getRawPointer(b); // frm
+  auto dataOut = getRawPointer(c);
 
   auto sew = getVs2(op)->typeInfo->sew.to_int();
 
@@ -68,6 +98,22 @@ v_literal_mask_body = '''
     if (dataM[i]) {
 '''
 
+v_literal_mask_frm_body = '''
+  assert(a->length == b->length && a->length == d->length);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
+
+  auto sew = op->typeInfo->sew.to_int();
+
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
 v_literal_mask_narrow_body = '''
   assert(a->length == b->length && a->length == c->length);
 
@@ -76,6 +122,22 @@ v_literal_mask_narrow_body = '''
   auto dataM = getRawPointer(a);
   auto dataA = getRawPointer(b);
   auto dataOut = getRawPointer(c);
+
+  auto sew = getVs2(op)->typeInfo->sew.to_int();
+
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
+v_literal_mask_narrow_frm_body = '''
+  assert(a->length == b->length && a->length == d->length);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c); // frm
+  auto dataOut = getRawPointer(d);
 
   auto sew = getVs2(op)->typeInfo->sew.to_int();
 
@@ -345,8 +407,12 @@ def create_v_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, o
       ret += v_literal_mask_body + include_literal("v" + op_id + ".h") + v_tuma_literal_mask_end
     elif "TailUndisturbed" in op_attr and "MaskUndisturbed" in op_attr : # tumu
       ret += v_literal_mask_body + include_literal("v" + op_id + ".h") + v_tumu_literal_mask_end
-    elif "ncvt" in op_id or "wcvt" in op_id:
+    elif ("ncvt" in op_id or "wcvt" in op_id) and "FRM" not in op_attr :
       ret += v_literal_mask_narrow_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
+    elif ("ncvt" in op_id or "wcvt" in op_id) and "FRM" in op_attr :
+      ret += v_literal_mask_narrow_frm_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
+    elif "FRM" in op_attr :
+      ret += v_literal_mask_frm_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
     else : # No explicit policy specified
       ret += v_literal_mask_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
   else :
@@ -354,8 +420,12 @@ def create_v_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, o
         ret += v_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + v_tu_literal_nonmask_end
     elif "TailAgnostic" in op_attr :
         ret += v_literal_nonmask_body + include_literal("v" + op_id + ".h") + v_ta_literal_nonmask_end
-    elif "ncvt" in op_id or "wcvt" in op_id:
+    elif ("ncvt" in op_id or "wcvt" in op_id) and "FRM" not in op_attr :
       ret += v_literal_nonmask_narrow_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
+    elif ("ncvt" in op_id or "wcvt" in op_id) and "FRM" in op_attr :
+      ret += v_literal_nonmask_narrow_frm_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
+    elif "FRM" in op_attr :
+      ret += v_literal_nonmask_frm_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
     else :
       ret += v_literal_nonmask_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
   return ret
