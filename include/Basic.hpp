@@ -141,6 +141,7 @@ enum OperatorAttr : OperatorAttrT {
   AddWithCarry = 1 << 20,
   VXRM = 1 << 21,
   FRM = 1 << 22,
+  CONVERT = 1 << 23,
 };
 
 struct OperatorBase : ValueBase {
