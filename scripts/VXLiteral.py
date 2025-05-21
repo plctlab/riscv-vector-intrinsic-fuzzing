@@ -91,6 +91,67 @@ vx_literal_nonmask_destructive_body = '''
   for (int i = 0; i < length; ++i) {
 '''
 
+vx_literal_nonmask_destructive_body_frm = '''
+  assert(a->length == c->length && a->length == e->length && b->length == 1);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataB = getRawPointer(b);
+  auto dataC = getRawPointer(c);
+  auto dataD = getRawPointer(d); //frm
+  auto dataOut = getRawPointer(e);
+
+  auto sew = op->typeInfo->sew.to_int();
+
+  #pragma push_macro("VI_VFP_VF_LOOP")
+  #undef VI_VFP_VF_LOOP
+  #define VI_VFP_VF_LOOP(BODY16, BODY32, BODY64)                               \\
+  RIF::RawDatumOperand vd(dataA[i]);                                           \\
+  RIF::RawDatumOperand rs1(*dataB);                                            \\
+  RIF::RawDatumOperand vs2(dataC[i]);                                          \\
+  switch (sew) {                                                               \\
+  case e16:                                                                    \\
+    BODY16;                                                                    \\
+    break;                                                                     \\
+  case e32:                                                                    \\
+    BODY32;                                                                    \\
+    break;                                                                     \\
+  case e64:                                                                    \\
+    BODY64;                                                                    \\
+    break;                                                                     \\
+  default:                                                                     \\
+    assert(0);                                                                 \\
+    break;                                                                     \\
+  }                                                                            \\
+  dataOut[i] = vd;
+
+  #pragma push_macro("VI_VFP_VF_LOOP_WIDE")
+  #undef VI_VFP_VF_LOOP_WIDE
+  #define VI_VFP_VF_LOOP_WIDE(BODY16, BODY32)                                  \\
+  RIF::RawDatumOperand vd(dataA[i]);                                           \\
+  RIF::RawDatumOperand rs1(*dataB);                                            \\
+  RIF::RawDatumOperand vs2(dataC[i]);                                          \\
+  switch (sew) {                                                               \\
+  case e16:                                                                    \\
+    vs2 = f16_to_f32(vs2);                                                     \\
+    rs1 = f16_to_f32(rs1);                                                     \\
+    BODY16;                                                                    \\
+    break;                                                                     \\
+  case e32:                                                                    \\
+    vs2 = f32_to_f64(vs2);                                                     \\
+    rs1 = f32_to_f64(rs1);                                                     \\
+    BODY32;                                                                    \\
+    break;                                                                     \\
+  default:                                                                     \\
+    assert(0);                                                                 \\
+    break;                                                                     \\
+  }                                                                            \\
+  dataOut[i] = vd;
+
+  for (int i = 0; i < length; ++i) {
+'''
+
 vx_literal_nonmask_end = '''
   }
 }
@@ -211,6 +272,71 @@ vx_literal_mask_destructive_body = '''
   auto dataB = getRawPointer(c);
   auto dataC = getRawPointer(d);
   auto dataOut = getRawPointer(e);
+
+  auto sew = op->typeInfo->sew.to_int();
+
+  #pragma push_macro("VI_VFP_VF_LOOP")
+  #undef VI_VFP_VF_LOOP
+  #define VI_VFP_VF_LOOP(BODY16, BODY32, BODY64)                               \\
+  RIF::RawDatumOperand vd(dataA[i]);                                           \\
+  RIF::RawDatumOperand rs1(*dataB);                                            \\
+  RIF::RawDatumOperand vs2(dataC[i]);                                          \\
+  switch (sew) {                                                               \\
+  case e16:                                                                    \\
+    BODY16;                                                                    \\
+    break;                                                                     \\
+  case e32:                                                                    \\
+    BODY32;                                                                    \\
+    break;                                                                     \\
+  case e64:                                                                    \\
+    BODY64;                                                                    \\
+    break;                                                                     \\
+  default:                                                                     \\
+    assert(0);                                                                 \\
+    break;                                                                     \\
+  }                                                                            \\
+  dataOut[i] = vd;
+
+  #pragma push_macro("VI_VFP_VF_LOOP_WIDE")
+  #undef VI_VFP_VF_LOOP_WIDE
+  #define VI_VFP_VF_LOOP_WIDE(BODY16, BODY32)                                  \\
+  RIF::RawDatumOperand vd(dataA[i]);                                           \\
+  RIF::RawDatumOperand rs1(*dataB);                                            \\
+  RIF::RawDatumOperand vs2(dataC[i]);                                          \\
+  switch (sew) {                                                               \\
+  case e16:                                                                    \\
+    vs2 = f16_to_f32(vs2);                                                     \\
+    rs1 = f16_to_f32(rs1);                                                     \\
+    BODY16;                                                                    \\
+    break;                                                                     \\
+  case e32:                                                                    \\
+    vs2 = f32_to_f64(vs2);                                                     \\
+    rs1 = f32_to_f64(rs1);                                                     \\
+    BODY32;                                                                    \\
+    break;                                                                     \\
+  default:                                                                     \\
+    assert(0);                                                                 \\
+    break;                                                                     \\
+  }                                                                            \\
+  dataOut[i] = vd;
+
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
+vx_literal_mask_destructive_body_frm = '''
+  assert(a->length == b->length && a->length == d->length &&
+          a->length == f->length && c->length == 1);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataMO = getRawPointer(b);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataC = getRawPointer(d);
+  auto dataD = getRawPointer(e); //frm
+  auto dataOut = getRawPointer(f);
 
   auto sew = op->typeInfo->sew.to_int();
 
@@ -532,6 +658,8 @@ def create_destructive_vx_op(op_type, op_id, op_attr, output_type, input_num, in
       ret += vx_literal_mask_destructive_body + include_literal("v" + op_id + ".h") + vx_tuma_literal_mask_destructive_end
     elif "TailUndisturbed" in op_attr and "MaskUndisturbed" in op_attr : # tumu
       ret += vx_literal_mask_destructive_body + include_literal("v" + op_id + ".h") + vx_tumu_literal_mask_destructive_end
+    elif "VXRM" in op_attr or "FRM" in op_attr : # vxrm
+      ret += vx_literal_mask_destructive_body_frm + include_literal("v" + op_id + ".h") + vx_literal_mask_destructive_end
     else : # No explicit policy specified
       ret += vx_literal_mask_destructive_body + include_literal("v" + op_id + ".h") + vx_literal_mask_destructive_end
   else :
@@ -539,6 +667,8 @@ def create_destructive_vx_op(op_type, op_id, op_attr, output_type, input_num, in
       ret += vx_literal_nonmask_destructive_body + include_literal("v" + op_id + ".h") + vx_tu_literal_nonmask_destructive_end
     elif "TailAgnostic" in op_attr :
       ret += vx_literal_nonmask_destructive_body + include_literal("v" + op_id + ".h") + vx_ta_literal_nonmask_destructive_end
+    elif "VXRM" in op_attr or "FRM" in op_attr:
+      ret += vx_literal_nonmask_destructive_body_frm + include_literal("v" + op_id + ".h") + vx_literal_nonmask_destructive_end
     else :
       ret += vx_literal_nonmask_destructive_body + include_literal("v" + op_id + ".h") + vx_literal_nonmask_destructive_end
   return ret
