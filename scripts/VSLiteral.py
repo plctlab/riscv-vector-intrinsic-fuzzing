@@ -13,6 +13,20 @@ vs_literal_nonmask_body = '''
   for (int i = 0; i < length; ++i) {
 '''
 
+vs_literal_nonmask_reduction_body = '''
+  assert(a->length == b->length);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataB = getRawPointer(b);
+  auto dataOut = getRawPointer(c);
+
+  auto sew = op->typeInfo->sew.to_int();
+  dataOut[0] = dataB[0];
+  for (int i = 0; i < length; ++i) {
+'''
+
 vs_ta_literal_nonmask_body = '''
 // scripts/VSLiteral.py
   assert(a->length == b->length);
@@ -80,6 +94,39 @@ vs_literal_mask_body = '''
     if (dataM[i]) {
 '''
 
+vs_literal_mask_reduction_body = '''
+  assert(a->length == b->length && a->length == c->length && a->length == d->length);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
+
+  auto sew = op->typeInfo->sew.to_int();
+
+  dataOut[0] = dataB[0];
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
+vs_literal_mask_reduction_widen_body = '''
+  assert(a->length == b->length && a->length == c->length && a->length == d->length);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
+
+  auto sew = op->typeInfo->sew.to_int();
+
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
 vs_tam_literal_mask_body = '''
   assert(a->length == b->length && a->length == c->length);
 
@@ -116,8 +163,9 @@ def include_literal(filename):
 
 vs_literal_mask_end = '''
     }else { // maskedoff element is agnostic
-      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+    memset(&dataOut[i], 0, sizeof(dataOut[i]));
   }
+}
 }
 '''
 
@@ -152,6 +200,11 @@ def create_vs_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
       ret += vs_tam_literal_mask_body + include_literal("v" + op_id + ".h") + vs_tam_literal_mask_end
     elif "TailUndisturbed" in op_attr : # tum
       ret += vs_tum_literal_mask_body + include_literal("v" + op_id + ".h") + vs_tum_literal_mask_end
+    elif "ReductionOperation" in op_attr :
+      if "WideningOperation" in op_attr :
+        ret += vs_literal_mask_reduction_widen_body + include_literal("v" + op_id + ".h") + vs_literal_mask_end
+      else:
+        ret += vs_literal_mask_reduction_body + include_literal("v" + op_id + ".h") + vs_literal_mask_end
     else :
       ret += vs_literal_mask_body + include_literal("v" + op_id + ".h") + vs_literal_mask_end
   else :
@@ -159,6 +212,8 @@ def create_vs_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
       ret += vs_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + vs_tu_literal_nonmask_end
     elif "TailAgnostic" in op_attr :
       ret += vs_ta_literal_nonmask_body + include_literal("v" + op_id + ".h") + vs_ta_literal_nonmask_end
+    elif "ReductionOperation" in op_attr :
+      ret += vs_literal_nonmask_reduction_body + include_literal("v" + op_id + ".h") + vs_literal_nonmask_end
     else :
       ret += vs_literal_nonmask_body + include_literal("v" + op_id + ".h") + vs_literal_nonmask_end
   return ret
