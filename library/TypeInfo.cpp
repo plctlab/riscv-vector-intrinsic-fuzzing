@@ -110,7 +110,7 @@ TypeInfo *TypeInfo::getNarrowed(const TypeInfo &typeInfo, TypeClass typeClass) {
   }
   size_t sewIdx = typeInfo.sew.to_index();
   size_t lmulIdx = lmulToIdx[typeInfo.lmul];
-  return typeInfos[sewIdx - 1][lmulIdx - 1][typeClass];
+  return typeInfos[sewIdx - 1][lmulIdx][typeClass];
 }
 
 TypeInfo *TypeInfo::getWidened(const TypeInfo &typeInfo, TypeClass typeClass) {
@@ -120,7 +120,7 @@ TypeInfo *TypeInfo::getWidened(const TypeInfo &typeInfo, TypeClass typeClass) {
   }
   size_t sewIdx = typeInfo.sew.to_index();
   size_t lmulIdx = lmulToIdx[typeInfo.lmul];
-  return typeInfos[sewIdx + 1][lmulIdx + 1][typeClass];
+  return typeInfos[sewIdx + 1][lmulIdx][typeClass];
 }
 
 TypeInfo *TypeInfo::setLmul(const TypeInfo &typeInfo, LmulType lmul) {
