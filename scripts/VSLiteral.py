@@ -163,7 +163,7 @@ def include_literal(filename):
 
 vs_literal_mask_end = '''
     }else { // maskedoff element is agnostic
-    memset(&dataOut[i], 0, sizeof(dataOut[i]));
+  memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
   }
 }
 }
@@ -202,11 +202,11 @@ def create_vs_op(op_type, op_id, op_attr, output_type, input_num, input_nfield, 
       ret += vs_tum_literal_mask_body + include_literal("v" + op_id + ".h") + vs_tum_literal_mask_end
     elif "ReductionOperation" in op_attr :
       if "WideningOperation" in op_attr :
-        ret += vs_literal_mask_reduction_widen_body + include_literal("v" + op_id + ".h") + vs_literal_mask_end
+        ret += vs_literal_mask_reduction_widen_body + include_literal("v" + op_id + ".h") + vs_tam_literal_mask_end
       else:
-        ret += vs_literal_mask_reduction_body + include_literal("v" + op_id + ".h") + vs_literal_mask_end
+        ret += vs_literal_mask_reduction_body + include_literal("v" + op_id + ".h") + vs_tam_literal_mask_end
     else :
-      ret += vs_literal_mask_body + include_literal("v" + op_id + ".h") + vs_literal_mask_end
+      ret += vs_literal_mask_body + include_literal("v" + op_id + ".h") + vs_tam_literal_mask_end
   else :
     if "TailUndisturbed" in op_attr :
       ret += vs_tu_literal_nonmask_body + include_literal("v" + op_id + ".h") + vs_tu_literal_nonmask_end
