@@ -552,7 +552,20 @@ void CodeGenForOperator::getRawPointers(std::vector<ValueBase *> inputs,
 std::vector<std::string> CodeGenForOperator::getIntrinsicArguments() {
   std::vector<std::string> ret;
 
-  for (auto &input : opInputs) {
+  if(op->opAttr & ReductionOperation){
+    for(int i = 0; i < op->inputs.size(); ++i) {
+      auto &input = opInputs[i];
+      std::string &rawID = input.first;
+      ValueBase *value = input.second;
+      if (isOneDValue(value) && i < opInputs.size() - 1 ) {
+        std::string loadVec = loadOneDToVector(os, value, rawID, op);
+        ret.push_back(loadVec);
+      } else {
+        ret.push_back("vec_value_"+ std::to_string(op->inputs.size() - 1) + "_0");
+      }
+    }
+  }else{
+    for (auto &input : opInputs) {
     std::string &rawID = input.first;
     ValueBase *value = input.second;
 
@@ -562,6 +575,7 @@ std::vector<std::string> CodeGenForOperator::getIntrinsicArguments() {
     } else {
       ret.push_back(rawID);
     }
+  }
   }
 
   return ret;
@@ -669,9 +683,22 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
 
     std::string counter = CodeGenForOperator::getCounter(os, loopLength);
 
-    std::string vecZero = getVectorFromConstant(os, 0, *output->typeInfo);
-    std::string vecReduction =
-        getVectorFromVector(os, vecZero, *output->typeInfo);
+    std::string vecReduction;
+    if(op->opAttr & MaskedOperation){
+      vecReduction = "vec_" + opInputs[2].second->id +"_0";
+    }else{
+      vecReduction = "vec_" + opInputs[1].second->id +"_0";
+    }
+
+
+    os << "size_t vl;\n";
+    getVL(counter);
+    if(hasMask(op)){
+      loadOneDToVector(os, opInputs[2].second, opInputs[2].first, op);
+    }else{
+      loadOneDToVector(os, opInputs[1].second, opInputs[1].first, op);
+    }
+
     if (hasMask(op) || hasTU(op)) {
       os << "// This function initializes the output elements according to\n"
             "// its\n"
@@ -715,10 +742,10 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
 	args = {loaded[0]};
       } else if (loaded.size() == 2) {
 	os << "//loaded[1]" << loaded[1];
-	args = {loaded[0], loaded[1]};
+	args = {loaded[0], vecReduction};
       } else if (loaded.size() == 3) {
 	os << "//loaded[2]" << loaded[2];
-        args = {loaded[0], loaded[1], loaded[2],};
+        args = {loaded[0], loaded[1], vecReduction};
       }
 
       genReductionOpString(os, op, vecReduction, args);
