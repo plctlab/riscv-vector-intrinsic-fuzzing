@@ -339,7 +339,11 @@ std::string loadOneDToVector(std::ostream &os, ValueBase *value,
        << " = __riscv_vmseq_vx_i8" << lmulStr << "_b" << booleanSew << "("
        << vecHolder << ", 1, vl);\n";
   } else { // normal
-    resultVec = getUniqueName("vec_" + value->id);
+    if(!(op->opAttr & ReductionOperation)){
+      resultVec = getUniqueName("vec_" + value->id);
+    }else{
+      resultVec = "vec_" + value->id + "_0";
+    }
     os << typeInfo.vectorTypeName << " " << resultVec << "= __riscv_vle"
        << typeInfo.sew.to_string() << "_v_" << typeInfo.shortVectorTypeName
        << "(" << holder << ", vl);\n";
