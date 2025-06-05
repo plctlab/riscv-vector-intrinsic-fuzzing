@@ -195,10 +195,21 @@ ValueBase *getVs1(OperatorBase *op) {
   if (!(op->opAttr & NoInputOperation) && isExistVs1Rs1(op)) {
     if (op->opAttr & MulAddOperation)
       vs1 = hasMask(op) ? op->inputs[2] : op->inputs[1];
-    else if (op->opAttr & ReductionOperation)
-            vs1 = hasMask(op) ? hasTU(op) ? op->inputs[3] : op->inputs[2]
-            : hasTU(op) ? op->inputs[2]
-                        : op->inputs[1];
+    else if (op->opAttr & ReductionOperation){
+      if (hasMask(op)) {
+        if (hasTU(op)) {
+            vs1 = op->inputs[3];
+        } else {
+            vs1 = op->inputs[2];
+        }
+      } else {
+        if (hasTU(op)) {
+            vs1 = op->inputs[2];
+        } else {
+            vs1 = op->inputs[1];
+        }
+      }
+    }
     else if (op->opAttr & MergeOperation) {
       assert(hasNonmask(op));
       vs1 = hasTU(op) ? op->inputs[3] : op->inputs[2];
