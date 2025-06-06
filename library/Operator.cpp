@@ -346,8 +346,7 @@ std::string loadOneDToVector(std::ostream &os, ValueBase *value,
     }
     os << typeInfo.vectorTypeName << " " << resultVec << "= __riscv_vle"
        << typeInfo.sew.to_string() << "_v_" << typeInfo.shortVectorTypeName
-       << "(" << holder << ", vl);\n";
-       }
+       << "(" << holder << ", vl);\n";}
   return resultVec;
 }
 
@@ -556,7 +555,7 @@ void CodeGenForOperator::getRawPointers(std::vector<ValueBase *> inputs,
 std::vector<std::string> CodeGenForOperator::getIntrinsicArguments() {
   std::vector<std::string> ret;
 
-  if(op->opAttr & ReductionOperation){
+  if(op->opAttr & ReductionOperation && !(op->opAttr & FRM)){
     for(int i = 0; i < op->inputs.size(); ++i) {
       auto &input = opInputs[i];
       std::string &rawID = input.first;
@@ -565,7 +564,27 @@ std::vector<std::string> CodeGenForOperator::getIntrinsicArguments() {
         std::string loadVec = loadOneDToVector(os, value, rawID, op);
         ret.push_back(loadVec);
       } else {
-        ret.push_back("vec_value_"+ std::to_string(op->inputs.size() - 1) + "_0");
+        if (isOneDValue(value)){
+          ret.push_back("vec_value_"+ std::to_string(op->inputs.size() - 1) + "_0");
+        }else{
+          ret.push_back(rawID);
+        }
+      }
+    }
+  }else if (op->opAttr & ReductionOperation && op->opAttr & FRM){
+     for(int i = 0; i < op->inputs.size(); ++i) {
+      auto &input = opInputs[i];
+      std::string &rawID = input.first;
+      ValueBase *value = input.second;
+      if (isOneDValue(value) && i < opInputs.size() - 2 ) {
+        std::string loadVec = loadOneDToVector(os, value, rawID, op);
+        ret.push_back(loadVec);
+      } else {
+        if (isOneDValue(value)){
+          ret.push_back("vec_value_"+ std::to_string(op->inputs.size() - 1) + "_0");
+        }else{
+          ret.push_back(rawID);
+        }
       }
     }
   }else{
@@ -695,6 +714,21 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
     }
 
 
+    if (op->opAttr & FRM){
+    os << "#if " << op->inputs[opInputs.size()-1]->id << "/5 == 0\n";
+    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 0\n";
+    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 1\n";
+    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 1\n";
+    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 2\n";
+    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 2\n";
+    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 3\n";
+    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 3\n";
+    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 4\n";
+    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 4\n";
+    os << "#else\n";
+    os << "\t" << "#error \"FRM VALUE should be [0:4]\"\n";
+    os << "#endif\n";}
+
     os << "size_t vl;\n";
     getVL(counter);
     if(hasMask(op)){
@@ -703,7 +737,7 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
       loadOneDToVector(os, opInputs[1].second, opInputs[1].first, op);
     }
 
-    if (hasMask(op) || hasTU(op)) {
+    if (!hasTU(op) || !hasTUMA(op) || !hasTUMU(op)) {
       os << "// This function initializes the output elements according to\n"
             "// its\n"
             "// tail policy and\n"
@@ -725,7 +759,7 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
             "// tail value in the beginning\n"
             "// before performing actual computing, namely, getting into the\n"
             "// loop.\n";
-      if (hasMask(op)) {
+      if (hasMask(op) || op->opAttr & WideningOperation){
         os << "memset(" << output->id << ", 0xff, sizeof(" << output->id
            << "));\n";
       } else if (hasTU(op)) {
@@ -742,14 +776,17 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
       std::vector<std::string> loaded = getIntrinsicArguments();
       std::vector<std::string> args;
       if (loaded.size() == 1) {
-	os << "//loaded[0]" << loaded[0];
-	args = {loaded[0]};
+        args = {loaded[0]};
       } else if (loaded.size() == 2) {
-	os << "//loaded[1]" << loaded[1];
-	args = {loaded[0], vecReduction};
+        args = {loaded[0], vecReduction};
       } else if (loaded.size() == 3) {
-	os << "//loaded[2]" << loaded[2];
-        args = {loaded[0], loaded[1], vecReduction};
+        if (op->opAttr & FRM){
+          args = {loaded[0], vecReduction, loaded[2]};
+        }else{
+          args = {loaded[0], loaded[1], vecReduction};
+        }
+      } else if(loaded.size() == 4) {
+        args = {loaded[0], loaded[1], vecReduction, loaded[3]};
       }
 
       genReductionOpString(os, op, vecReduction, args);

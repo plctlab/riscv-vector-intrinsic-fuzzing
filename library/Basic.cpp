@@ -245,12 +245,44 @@ void initializeLmul(OperatorBase *op) {
   int gap = op->typeInfo->lmul - getSmallestLmulForSew(op->typeInfo->sew);
   assert(gap >= 0);
 
+  if(op->opAttr & ReductionOperation && op->opAttr & WideningOperation && !(op->opAttr & FRM)){
+    for(int i = 0; i < op->inputs.size() ; ++i) {
+      auto input = op->inputs[i];
+      assert(input != nullptr);
+      input->typeInfo = TypeInfo::setLmul(
+          *input->typeInfo,
+          static_cast<LmulType>(gap +
+                                getSmallestLmulForSew(input->typeInfo->sew)));
+    }
+    auto input = op->inputs[op->inputs.size()-1];
+          input->typeInfo = TypeInfo::setLmul(
+          *input->typeInfo,
+          static_cast<LmulType>(gap +
+                                getSmallestLmulForSew(input->typeInfo->sew) - 1));
+  }else if(op->opAttr & ReductionOperation && op->opAttr & WideningOperation && op->opAttr & FRM){
+    for(int i = 0; i < op->inputs.size() - 1 ; ++i) {
+      auto input = op->inputs[i];
+      assert(input != nullptr);
+      input->typeInfo = TypeInfo::setLmul(
+          *input->typeInfo,
+          static_cast<LmulType>(gap +
+                                getSmallestLmulForSew(input->typeInfo->sew)));
+    }
+   op->inputs[op->inputs.size()-2]->typeInfo = TypeInfo::setLmul(
+    *op->inputs[op->inputs.size()-2]->typeInfo,
+    static_cast<LmulType>(gap + getSmallestLmulForSew(
+      op->inputs[op->inputs.size()-2]->typeInfo->sew) - 1));
+  op->inputs[op->inputs.size()-1]->typeInfo = TypeInfo::setLmul(
+    *op->inputs[op->inputs.size()-1]->typeInfo,
+    static_cast<LmulType>(gap + getSmallestLmulForSew(
+      op->inputs[op->inputs.size()-2]->typeInfo->sew)));
+  }else{
   for (auto input : op->inputs) {
     assert(input != nullptr);
     input->typeInfo = TypeInfo::setLmul(
         *input->typeInfo,
         static_cast<LmulType>(gap +
-                              getSmallestLmulForSew(input->typeInfo->sew)));
+                              getSmallestLmulForSew(input->typeInfo->sew)));}
   }
 
   auto vd = getVd(op);
