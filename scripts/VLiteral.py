@@ -21,12 +21,14 @@ v_literal_nonmask_frm_body = '''
   auto length = a->length;
 
   auto dataA = getRawPointer(a);
-  auto dataB = getRawPointer(b); // frm
+  auto dataB = {}; // frm
   auto dataOut = getRawPointer(c);
 
-  softfloat_roundingMode = *dataB / 5;
+  auto softfloat_roundingMode = P.VU.set_fround_mode(dataB);
   auto sew = op->typeInfo->sew.to_int();
+'''
 
+nonmask_loop_start = '''
   for (int i = 0; i < length; ++i) {
 '''
 
@@ -51,13 +53,12 @@ v_literal_nonmask_narrow_frm_body = '''
   auto length = a->length;
 
   auto dataA = getRawPointer(a);
-  auto dataB = getRawPointer(b); // frm
+  auto dataB = {}; // frm
   auto dataOut = getRawPointer(c);
 
-  softfloat_roundingMode = *dataB / 5;
+  auto softfloat_roundingMode = P.VU.set_fround_mode(dataB);
   auto sew = getVs2(op)->typeInfo->sew.to_int();
 
-  for (int i = 0; i < length; ++i) {
 '''
 
 v_tu_literal_nonmask_body = '''
@@ -101,17 +102,21 @@ v_literal_mask_body = '''
 '''
 
 v_literal_mask_frm_body = '''
+// scripts/VLiteral.py v_literal_mask_frm_body
   assert(a->length == b->length && a->length == d->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
   auto dataA = getRawPointer(b);
-  auto dataB = getRawPointer(c);
+  auto dataB = {}; // frm
   auto dataOut = getRawPointer(d);
 
+  auto softfloat_roundingMode = P.VU.set_fround_mode(dataB);
   auto sew = op->typeInfo->sew.to_int();
+'''
 
+mask_loop_start = '''
   for (int i = 0; i < length; ++i) {
     if (dataM[i]) {
 '''
@@ -132,20 +137,20 @@ v_literal_mask_narrow_body = '''
 '''
 
 v_literal_mask_narrow_frm_body = '''
+  // scripts/VLiteral.py v_literal_mask_narrow_frm_body
   assert(a->length == b->length && a->length == d->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
   auto dataA = getRawPointer(b);
-  auto dataB = getRawPointer(c); // frm
+  auto dataB = {}; // frm
   auto dataOut = getRawPointer(d);
 
+  auto softfloat_roundingMode = P.VU.set_fround_mode(dataB);
   auto sew = getVs2(op)->typeInfo->sew.to_int();
-
-  for (int i = 0; i < length; ++i) {
-    if (dataM[i]) {
 '''
+
 
 def include_literal(filename):
     return "#include\"" + filename + "\""
@@ -412,9 +417,29 @@ def create_v_op(op_type, op_id, sew, op_attr, output_type, input_num, input_nfie
     elif ("ncvt" in op_id or "wcvt" in op_id) and "FRM" not in op_attr :
       ret += v_literal_mask_narrow_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
     elif ("ncvt" in op_id or "wcvt" in op_id) and "FRM" in op_attr :
-      ret += v_literal_mask_narrow_frm_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
+      if "frm0" in op_attr :
+        frm = 0
+      elif "frm1" in op_attr :
+        frm = 1
+      elif "frm2" in op_attr :
+        frm = 2
+      elif "frm3" in op_attr :
+        frm = 3
+      elif "frm4" in op_attr :
+        frm = 4
+      ret += v_literal_mask_narrow_frm_body.format(frm) + mask_loop_start + include_literal("v" + op_id + ".h") + v_literal_mask_end
     elif "FRM" in op_attr :
-      ret += v_literal_mask_frm_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
+      if "frm0" in op_attr :
+        frm = 0
+      elif "frm1" in op_attr :
+        frm = 1
+      elif "frm2" in op_attr :
+        frm = 2
+      elif "frm3" in op_attr :
+        frm = 3
+      elif "frm4" in op_attr :
+        frm = 4
+      ret += v_literal_mask_frm_body.format(frm) + mask_loop_start + include_literal("v" + op_id + ".h") + v_literal_mask_end
     else : # No explicit policy specified
       ret += v_literal_mask_body + include_literal("v" + op_id + ".h") + v_literal_mask_end
   else :
@@ -425,9 +450,29 @@ def create_v_op(op_type, op_id, sew, op_attr, output_type, input_num, input_nfie
     elif ("ncvt" in op_id or "wcvt" in op_id) and "FRM" not in op_attr :
       ret += v_literal_nonmask_narrow_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
     elif ("ncvt" in op_id or "wcvt" in op_id) and "FRM" in op_attr :
-      ret += v_literal_nonmask_narrow_frm_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
+      if "frm0" in op_attr :
+        frm = 0
+      elif "frm1" in op_attr :
+        frm = 1
+      elif "frm2" in op_attr :
+        frm = 2
+      elif "frm3" in op_attr :
+        frm = 3
+      elif "frm4" in op_attr :
+        frm = 4
+      ret += v_literal_nonmask_narrow_frm_body.format(frm) + nonmask_loop_start + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
     elif "FRM" in op_attr :
-      ret += v_literal_nonmask_frm_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
+      if "frm0" in op_attr :
+        frm = 0
+      elif "frm1" in op_attr :
+        frm = 1
+      elif "frm2" in op_attr :
+        frm = 2
+      elif "frm3" in op_attr :
+        frm = 3
+      elif "frm4" in op_attr :
+        frm = 4
+      ret += v_literal_nonmask_frm_body.format(frm) + nonmask_loop_start + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
     else :
       ret += v_literal_nonmask_body + include_literal("v" + op_id + ".h") + v_literal_nonmask_end
   return ret

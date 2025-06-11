@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: update dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-14
+        export CC=gcc-14
     - name: build generator
       run: |
         mkdir -p build
@@ -32,7 +37,11 @@ jobs:
         compiler: [gcc, llvm]
     steps:
     - uses: actions/checkout@v2
-
+    - name: update dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-14
+        export CC=gcc-14
     - name: download compiler with v extension release
       id: download
       uses: robinraju/release-downloader@v1
@@ -66,6 +75,7 @@ jobs:
             export RVV_CC="clang";;
         esac
         env
+        rm -rf build
         cd test
         ../rif-test --cc=$RVV_CC
         make -j $(nproc) 2>&1 | tee ${{matrix.compiler}}_test.log

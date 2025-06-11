@@ -44,8 +44,8 @@ def parseCustomOperatorDefinitions(filename) :
     input_nfield = opdef_info.input_nfield
     output_nfield = opdef_info.output_nfield
     input_types = opdef_info.input_types
-    if op_id[-2:] == "vx" or op_id[-2:] == "wx" or op_id[-2:] == "vf":
-      if "MulAddOperation" in op_attr:
+    if op_id[-2:] == "vx" or op_id[-2:] == "wx" or op_id[-2:] == "vf" or op_id[-2:] == "wf":
+      if "MulAddOperation" in op_attr or op_type == "FLOAT" :
         code_gen_func = create_destructive_vx_op
       elif "MaskAgnostic" in op_attr and "TailAgnostic" not in op_attr and "TailUndisturbed" not in op_attr:
         code_gen_func = create_masked_no_maskedoff_vx_op
@@ -54,7 +54,7 @@ def parseCustomOperatorDefinitions(filename) :
     elif op_id[-2:] == "wf":
       code_gen_func = create_wf_op
     elif op_id[-2:] == "vv" or op_id[-2:] == "wv" or op_id[-2:] == "mm":
-      if "MulAddOperation" in op_attr :
+      if "MulAddOperation" in op_attr or op_type == "FLOAT":
         code_gen_func = create_destructive_vv_op
       elif "MaskAgnostic" in op_attr and "TailAgnostic" not in op_attr and "TailUndisturbed" not in op_attr:
         code_gen_func = create_masked_no_maskedoff_vv_op

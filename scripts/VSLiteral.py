@@ -51,13 +51,15 @@ vs_literal_nonmask_reduction_frm_body = '''
 
   auto dataA = getRawPointer(a);
   auto dataB = getRawPointer(b);
-  auto dataC = {}; //frm
+  auto dataC = {};
   auto dataOut = getRawPointer(d);
 
-  auto frm = dataC;
-  P.VU.set_fround_mode(frm);
+  auto softfloat_roundingmode = P.VU.set_fround_mode(dataC);
   auto sew = op->typeInfo->sew.to_int();
   dataOut[0] = dataB[0];
+'''
+loop_start = '''
+  for (int i = 0; i < length; ++i) {
 '''
 
 vs_literal_nonmask_reduction_frm_widen_body = '''
@@ -68,17 +70,12 @@ vs_literal_nonmask_reduction_frm_widen_body = '''
 
   auto dataA = getRawPointer(a);
   auto dataB = getRawPointer(b);
-  auto dataC = {}; //frm
+  auto dataC = {};
   auto dataOut = getRawPointer(d);
 
-  auto frm = dataC;
-  P.VU.set_fround_mode(frm);
+  auto softfloat_roundingmode = P.VU.set_fround_mode(dataC);
   auto sew = op->typeInfo->sew.to_int();
   dataOut[0] = dataB[0];
-'''
-
-loop_start = '''
-  for (int i = 0; i < length; ++i) {
 '''
 
 
@@ -186,18 +183,17 @@ vs_literal_mask_reduction_body = '''
 
 vs_literal_mask_reduction_frm_body = '''
 // scripts/VSLiteral.py vs_literal_mask_reduction_frm_body
-  assert(a->length == b->length && a->length == c->length);
+  assert(a->length == b->length && a->length == c->length && a->length == e->length);
 
   auto length = a->length;
 
   auto dataM = getRawPointer(a);
   auto dataA = getRawPointer(b);
   auto dataB = getRawPointer(c);
-  auto dataC = {}; //frm
+  auto dataC = {}; // frm
   auto dataOut = getRawPointer(e);
 
-  auto frm = dataC;
-  P.VU.set_fround_mode(frm);
+  auto softfloat_roundingmode = P.VU.set_fround_mode(dataC);
   auto sew = op->typeInfo->sew.to_int();
 
   dataOut[0] = dataB[0];
@@ -369,12 +365,12 @@ def create_vs_op(op_type, op_id, sew, op_attr, output_type, input_num, input_nfi
         if "WideningOperation" in op_attr :
           ret += vs_literal_nonmask_reduction_frm_widen_body.format(frm) + loop_start + include_literal("v" + op_id + ".h") + vs_ta_literal_nonmask_end
         else:
-          ret += vs_literal_nonmask_reduction_frm_body.format(frm) + loop_start + include_literal("v" + op_id + ".h") + right_curly_bracket_loop_start + vs_ta_literal_nonmask_frm_rounding.format(sew) + vs_ta_literal_nonmask_frm_end
+          ret += vs_literal_nonmask_reduction_frm_body.format(frm) + loop_start + include_literal("v" + op_id + ".h") + vs_ta_literal_nonmask_end
       else:
         if "WideningOperation" in op_attr :
           ret += vs_literal_nonmask_reduction_widen_body + include_literal("v" + op_id + ".h") + vs_ta_literal_nonmask_end
         else:
-          ret += vs_literal_nonmask_reduction_body + include_literal("v" + op_id + ".h") + vs_literal_nonmask_end
+          ret += vs_literal_nonmask_reduction_body + include_literal("v" + op_id + ".h") + vs_ta_literal_nonmask_end
     else :
       ret += vs_literal_nonmask_body + include_literal("v" + op_id + ".h") + vs_literal_nonmask_end
   return ret
