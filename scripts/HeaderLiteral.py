@@ -11,4 +11,5 @@ header_literal = '''
 
 #include <cassert>
 #include <ostream>
+#include <softfloat.h>
 '''

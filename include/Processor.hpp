@@ -2,6 +2,17 @@
 #define RIF_PROCESSOR_H
 #include <cstdint>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+// declare the C softfloat global so C++ can write it
+extern uint_fast8_t softfloat_roundingMode;
+#ifdef __cplusplus
+}
+#endif
+
+extern uint_fast8_t softfloat_roundingMode;
+
 enum VRM {
   RNU = 0, // round-to-nearest-up
   RNE,     // round-to-nearest-even
@@ -11,11 +22,24 @@ enum VRM {
 };
 
 enum FloatRM {
-  RNE_FRM = 0, // Round to Nearest, ties to Even
-  RTZ_FRM,     // Round towards Zero
-  RDN_FRM,     // Round Down
-  RUP_FRM,     // Round Up
-  RMM_FRM,     // Round to Nearest, ties to Max Magnitude
+    // softfloat_round_near_even   = 0,
+    // softfloat_round_minMag      = 1,
+    // softfloat_round_min         = 2,
+    // softfloat_round_max         = 3,
+    // softfloat_round_near_maxMag = 4,
+    // softfloat_round_odd         = 5
+// 000 RNE Round to Nearest, ties to Even
+// 001 RTZ  Round towards Zero
+// 010 RDN Round Down (towards -∞)
+// 011 RUP Round Up (towards +∞)
+// 100 RMM Round to Nearest, ties to Max Magnitude
+// 111 DYM
+  RNE_FRM = 0,
+  RTZ_FRM = 1,
+  RDN_FRM = 2,
+  RUP_FRM = 3,
+  RMM_FRM = 4,
+  DYN_FRM = 7,
   INVALID_FRM
 };
 
@@ -24,19 +48,24 @@ struct Processor {
     unsigned vsew;      // sew
     VRM xrm = VRM::RNU; // rounding mode
     VRM get_vround_mode() { return xrm; }
-    void set_vround_mode(int mode) {
+    VRM set_vround_mode(int mode) {
       if (mode >= RNU && mode < INVALID_RM)
         xrm = static_cast<VRM>(mode);
       else
         xrm = INVALID_RM;
+      return xrm;
     }
-    FloatRM frm = FloatRM::RNE_FRM; // float point rounding mode
-    FloatRM get_fround_mode() { return frm; }
-    void set_fround_mode(int mode) {
-      if (mode >= RNE_FRM && mode < INVALID_FRM)
-        frm = static_cast<FloatRM>(mode);
-      else
-        frm = INVALID_FRM;
+
+    uint_fast8_t get_fround_mode() { return softfloat_roundingMode; }
+    // Replace/implement this to also update the softfloat C global
+    uint_fast8_t set_fround_mode(int mode) {
+      // map and validate
+      if (mode >= RNE_FRM && mode < INVALID_FRM) {
+        softfloat_roundingMode = mode;
+      } else {
+        softfloat_roundingMode = INVALID_FRM;
+      }
+      return softfloat_roundingMode;
     }
   };
   VectorUnit VU;

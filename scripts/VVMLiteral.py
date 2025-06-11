@@ -1,6 +1,7 @@
 vvm_literal_start0 = "void compute"
 vvm_literal_start1 = "Op(RIF::OperatorBase *op) {\n"
 vvm_literal_body = '''
+  // scripts/VVLiteral.py vvm_literal_body
   assert(a->length == b->length && a->length == c->length && a->length == d->length);
 
   auto length = a->length;

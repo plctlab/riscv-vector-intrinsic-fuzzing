@@ -727,7 +727,7 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
             "// tail value in the beginning\n"
             "// before performing actual computing, namely, getting into the\n"
             "// loop.\n";
-      if (hasMask(op) || op->opAttr & WideningOperation || ((op->opAttr & ReductionOperation) && (op->opAttr & FRM))) {
+      if (hasMask(op) || op->opAttr & WideningOperation || op->opAttr & ReductionOperation){
         os << "memset(" << output->id << ", 0xff, sizeof(" << output->id
            << "));\n";
       } else if (hasTU(op)) {

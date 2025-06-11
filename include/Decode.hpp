@@ -296,7 +296,7 @@ typedef unsigned __int128 uint128_t;
   } while (0)
 
 #define VI_VV_LOOP_AVG(op)                                                     \
-  VRM xrm = p->VU.get_vround_mode();                                           \
+  VRM xrm = p->VU.set_vround_mode(dataC);                                      \
   VI_VV_LOOP({                                                                 \
     uint128_t res = (uint128_t)vs2 op vs1;                                     \
     INT_ROUNDING(res, xrm, 1);                                                 \
@@ -304,7 +304,7 @@ typedef unsigned __int128 uint128_t;
   })
 
 #define VI_VX_LOOP_AVG(op)                                                     \
-  VRM xrm = p->VU.get_vround_mode();                                           \
+  VRM xrm = p->VU.set_vround_mode(dataC);                                      \
   VI_VX_LOOP({                                                                 \
     uint128_t res = (uint128_t)vs2 op rs1;                                     \
     INT_ROUNDING(res, xrm, 1);                                                 \
@@ -312,7 +312,7 @@ typedef unsigned __int128 uint128_t;
   })
 
 #define VI_VV_ULOOP_AVG(op)                                                    \
-  VRM xrm = p->VU.get_vround_mode();                                           \
+  VRM xrm = p->VU.set_vround_mode(dataC);                                      \
   VI_VV_ULOOP({                                                                \
     uint128_t res = (uint128_t)vs2 op vs1;                                     \
     INT_ROUNDING(res, xrm, 1);                                                 \
@@ -320,7 +320,7 @@ typedef unsigned __int128 uint128_t;
   })
 
 #define VI_VX_ULOOP_AVG(op)                                                    \
-  VRM xrm = p->VU.get_vround_mode();                                           \
+  VRM xrm = p->VU.set_vround_mode(dataC);                                      \
   VI_VX_ULOOP({                                                                \
     uint128_t res = (uint128_t)vs2 op rs1;                                     \
     INT_ROUNDING(res, xrm, 1);                                                 \
@@ -350,7 +350,7 @@ typedef unsigned __int128 uint128_t;
 #define VI_VFP_VV_LOOP(BODY16, BODY32, BODY64)                                 \
   RIF::RawDatumOperand vs2(dataA[i]);                                          \
   RIF::RawDatumOperand vs1(dataB[i]);                                          \
-  RIF::RawDatumOperand vd;                                                     \
+  RIF::RawDatumOperand vd(dataOut[i]);                                         \
   switch (sew) {                                                               \
   case e16:                                                                    \
     BODY16;                                                                    \
