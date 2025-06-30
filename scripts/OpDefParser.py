@@ -14,7 +14,7 @@ class OpDefInfo:
   input_types = []
 
   def __str__(self):
-    return "CUSTOM_OP_TYPE({op_type}, {op_id}, {type_class}, {op_attr}, {output_type}, {input_num}, {input_nfield}, {output_nfield}, {input_types})".format_map(self.__dict__)
+    return "CUSTOM_OP_TYPE({op_type}, {op_id}, {sew}, {type_class}, {op_attr}, {output_type}, {input_num}, {input_nfield}, {output_nfield}, {input_types})".format_map(self.__dict__)
 
 # format:
 # CUSTOM_OP_TYPE(OP_TYPE, OP_ID, SEW, TYPE_CLASS, OP_ATTR, OUTPUT_TYPE,

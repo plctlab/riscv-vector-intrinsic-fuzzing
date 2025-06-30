@@ -27,8 +27,6 @@ extern std::string VerificationMode;
 extern bool VerifyTailPolicy;
 extern bool VerifyMaskPolicy;
 extern bool HasPolicy;
-extern bool HasTA;
-extern bool HasMA;
 
 void parseArguments(int argc, char **argv);
 void initializeRNG(uint32_t seed = 0xdeadbeef);

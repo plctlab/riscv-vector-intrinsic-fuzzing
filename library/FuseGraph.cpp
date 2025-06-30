@@ -368,8 +368,7 @@ bool isFusable(OperatorBase *op) {
       typeID == "vmsif_m" || typeID == "vmsof_m" || typeID == "viota_m" ||
       typeID == "vid_v")
     return false;
-  if (op->opAttr & TailAgnostic || op->opAttr & TailUndisturbed ||
-      op->opAttr & MaskAgnostic || op->opAttr & MaskUndisturbed)
+  if (op->opAttr & TailUndisturbed || op->opAttr & MaskUndisturbed)
     return false;
   return true;
 }
