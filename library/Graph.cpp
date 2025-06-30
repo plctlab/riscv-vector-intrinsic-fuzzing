@@ -74,23 +74,11 @@ static bool hasPolicyAttr(const OpDefinition &opDef) {
   return true;
 }
 
-static bool hasTAAttr(const OpDefinition &opDef) {
-  if (!HasTA)
-    return (opDef.opAttr & TailAgnostic) == 0;
-  return true;
-}
-
-static bool hasMAAttr(const OpDefinition &opDef) {
-  if (!HasMA)
-    return (opDef.opAttr & MaskAgnostic) == 0;
-  return true;
-}
-
 Graph::Graph() {
   if (isConstructedUseDefineCandidate == false) {
     getOpDefinitions();
     std::vector<std::function<bool(const OpDefinition &)>> filters = {
-        hasPolicyAttr, hasTAAttr, hasMAAttr};
+        hasPolicyAttr};
     for (const auto &opDef : opDefs) {
       bool valid = true;
       for (auto &filter : filters) {

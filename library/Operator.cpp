@@ -24,7 +24,7 @@ namespace RIF {
 int placeholderIndex;
 
 static std::string getNewPlaceholderName() {
-  return "\tplaceholder" + std::to_string(placeholderIndex++);
+  return "placeholder" + std::to_string(placeholderIndex++);
 }
 
 static std::string getUniqueName(std::string name) {
@@ -359,27 +359,19 @@ static void genIntrinsicFuncSuffix(std::ostream &os, OperatorBase *op,
     os << "_rm";
   }
   if (isExplicitPolicy(op)) {
+    {
     os << "_";
-    if (hasTA(op)) {
-      assert(!hasTU(op));
-      os << "ta";
     }
     if (hasTU(op)) {
-      assert(!hasTA(op));
       os << "tu";
     }
-    if (hasMA(op)) {
-      assert(hasMask(op) && !hasMU(op));
-      os << "ma";
-    }
     if (hasMU(op)) {
-      assert(hasMask(op) && !hasMA(op));
+      assert(hasMask(op));
       os << "mu";
     }
     if (opAttr & ReductionOperation && hasMask(op)) {
       os << "m";
     }
-
     os << "(";
   } else {
     if (hasMask(op))
@@ -392,16 +384,34 @@ static void genIntrinsicFuncSuffix(std::ostream &os, OperatorBase *op,
     }
   }
 
-  for (auto arg : args)
-    os << arg << ", ";
-
-  if (opAttr & OperatorAttr::HaveVLParameter) {
-    os << "vl);\n";
-  } else if (opAttr & OperatorAttr::NoVLParameter)
-    os << ");\n";
-  else {
-    std::cerr << "VL attribute for operator is not set correctly.\n";
-    exit(1);
+  if (op->opAttr & VXRM || op->opAttr & FRM) {
+    for (int i = 0; i < args.size() - 1; ++i) {
+      os << args[i] << ", ";
+    }
+    if (op->opAttr & vxrm0 || op->opAttr & frm0) {
+      os << "0, vl);\n";
+    } else if (op->opAttr & vxrm1 || op->opAttr & frm1) {
+      os << "1, vl);\n";
+    } else if (op->opAttr & vxrm2 || op->opAttr & frm2) {
+      os << "2, vl);\n";
+    } else if (op->opAttr & vxrm3 || op->opAttr & frm3) {
+      os << "3, vl);\n";
+    } else if (op->opAttr & frm4) {
+      os << "4, vl);\n";
+    } else {
+      os << "vl);\n";
+    }
+  } else {
+    for (auto arg : args)
+      os << arg << ", ";
+    if (opAttr & OperatorAttr::HaveVLParameter) {
+      os << "vl);\n";
+    } else if (opAttr & OperatorAttr::NoVLParameter) {
+      os << ");\n";
+    } else {
+      std::cerr << "VL attribute for operator is not set correctly.\n";
+      exit(1);
+    }
   }
 }
 
@@ -524,12 +534,8 @@ static void storeScalarToScalar(std::ostream &os, const std::string &lhs,
 
 static std::string getOpSuffix(OperatorBase *op) {
   std::string s = "_";
-  if (hasTA(op))
-    s += "ta";
   if (hasTU(op))
     s += "tu";
-  if (hasMA(op))
-    s += "ma";
   if (hasMU(op))
     s += "mu";
   if (s == "_" && hasMask(op))
@@ -643,35 +649,11 @@ void CodeGenForOperator::generateSingleOperatorCode() {
   auto output = op->outputs[0];
   getRawPointers(op->inputs, output);
   os << "\n";
-  if (op->opAttr & VXRM){
-    os << "#if " << op->inputs[opInputs.size()-1]->id << "/4 == 0\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 0\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/4 == 1\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 1\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/4 == 2\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 2\n";
-          os << "#elif " << op->inputs[opInputs.size()-1]->id << "/4 == 3\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 3\n";
-    os << "#else\n";
-    os << "\t" << "#error \"VXRM VALUE should be [0:3]\"\n";
-    os << "#endif\n";
-  }else if (op->opAttr & FRM){
-    os << "#if " << op->inputs[opInputs.size()-1]->id << "/5 == 0\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 0\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 1\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 1\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 2\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 2\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 3\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 3\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 4\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 4\n";
-    os << "#else\n";
-    os << "\t" << "#error \"FRM VALUE should be [0:4]\"\n";
-    os << "#endif\n";
-    }
 
   std::string counter = CodeGenForOperator::getCounter(os, loopLength);
+    if (hasMask(op) && op->opAttr & FRM) {
+      os << "memset(" << output->id << ", 0xff, sizeof(" << output->id
+         << "));\n";}
   CodeGenForOperator::getLoopStart(os, counter);
   {
     if (haveTailPolicy(op)) {
@@ -715,22 +697,6 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
       vecReduction = "vec_" + opInputs[1].second->id +"_0";
     }
 
-
-    if (op->opAttr & FRM){
-    os << "#if " << op->inputs[opInputs.size()-1]->id << "/5 == 0\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 0\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 1\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 1\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 2\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 2\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 3\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 3\n";
-    os << "#elif " << op->inputs[opInputs.size()-1]->id << "/5 == 4\n";
-    os << "\t" << "#define " << opInputs[opInputs.size()-1].first << " 4\n";
-    os << "#else\n";
-    os << "\t" << "#error \"FRM VALUE should be [0:4]\"\n";
-    os << "#endif\n";}
-
     os << "size_t vl;\n";
     getVL(counter);
     if(hasMask(op)){
@@ -739,7 +705,7 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
       loadOneDToVector(os, opInputs[1].second, opInputs[1].first, op);
     }
 
-    if (!hasTU(op) || !hasTUMA(op) || !hasTUMU(op)) {
+    if (!hasTU(op) || !hasTUM(op) || !hasTUMU(op)) {
       os << "// This function initializes the output elements according to\n"
             "// its\n"
             "// tail policy and\n"
@@ -761,7 +727,7 @@ struct CodeGenForReductionOperator : CodeGenForOperator {
             "// tail value in the beginning\n"
             "// before performing actual computing, namely, getting into the\n"
             "// loop.\n";
-      if (hasMask(op) || op->opAttr & WideningOperation){
+      if (hasMask(op) || op->opAttr & WideningOperation || ((op->opAttr & ReductionOperation) && (op->opAttr & FRM))) {
         os << "memset(" << output->id << ", 0xff, sizeof(" << output->id
            << "));\n";
       } else if (hasTU(op)) {
@@ -900,16 +866,12 @@ struct CodeGenForVmsbfVmsifVmsof : CodeGenForOperator {
 
   std::string getLoopEndStoreMask(std::vector<std::string> args) {
     std::string vecM = args[0];
-    std::string vecMO = args[1];
     std::string vecStored = getNewPlaceholderName();
     int booleanSew = getBooleanSew(vlTypeInfo);
     os << " // generated by library/Operator.cpp getLoopEndStoreMask \n\t";
     os << "vbool" << booleanSew << "_t " << vecStored << " = ";
-    if (hasMA(op)) {
+    if (hasMask(op)) {
       os << "__riscv_vmnot_m_b" << booleanSew << "(" << vecM << ", vl);\n";
-    } else {
-      os << "__riscv_vmandn_mm_b" << booleanSew << "(" << vecMO << ", " << vecM
-         << ", vl);\n";
     }
     return vecStored;
   }
@@ -986,10 +948,18 @@ struct CodeGenForViota : CodeGenForOperator {
     os << opResult << ", "
        << "/* find what is accumulateMask:*/" << accumulateMask;
 
-    if (haveTailPolicy(op)) {
-      os << ", tail_vl);\n";
+    if (op->opAttr & vxrm0 || op->opAttr & frm0) {
+      os << ", 0, vl); \n";
+    } else if (op->opAttr & vxrm1 || op->opAttr & frm1) {
+      os << ", 1, vl); \n";
+    } else if (op->opAttr & vxrm2 || op->opAttr & frm2) {
+      os << ", 2, vl); \n";
+    } else if (op->opAttr & vxrm3 || op->opAttr & frm3) {
+      os << ", 3, vl); \n";
+    } else if (op->opAttr & frm4) {
+      os << ", 4, vl); \n";
     } else {
-      os << ", vl);\n";
+      os << ", vl); \n";
     }
     storeVectorToOneD(os, opOutput.first, opResult, opOutput.second);
   }
@@ -1180,7 +1150,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
     if (hasMask(op)) {
       auto inputM = opInputs[0]; // mask
       ret.push_back(loadOneDToVector(os, inputM.second, inputM.first, op));
-      if (isLoadType() && !(op->opAttr & NoMaskedOff)) { // non-tama load
+      if (isLoadType()) { // non-tama load
         auto inputMO = opInputs[1];                      // maskedoff
         ret.push_back(loadOneDToVector(os, inputMO.second, inputMO.first, op));
       }
@@ -1190,7 +1160,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
     }
     if (isLoadType()) {
       auto inputBase =
-          hasMask(op) ? op->opAttr & NoMaskedOff ? opInputs[1] : opInputs[2]
+          hasMask(op) ? opInputs[1]
           : hasTU(op) ? opInputs[1]
                       : opInputs[0];
       ret.push_back(inputBase.first);
@@ -1208,7 +1178,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
       auto inputM = opInputs[0]; // mask
       ret.push_back(loadOneDToVector(os, inputM.second, inputM.first, op));
       if (isLoadType() &&
-          !(op->opAttr & NoMaskedOff)) { // non-tama indexed load
+          !(op->opAttr)) { // non-tama indexed load
         auto inputMO = opInputs[1];      // maskedoff
         ret.push_back(loadOneDToVector(os, inputMO.second, inputMO.first, op));
       }
@@ -1218,8 +1188,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
     }
 
     std::pair<std::string, ValueBase *> inputIdx =
-        isLoadType() ? (hasMask(op) ? op->opAttr & NoMaskedOff ? opInputs[2]
-                                                               : opInputs[3]
+        isLoadType() ? (hasMask(op) ? opInputs[2]
                         : hasTU(op) ? opInputs[2]
                                     : opInputs[1])
                      : (hasMask(op) ? opInputs[2] : opInputs[1]);
@@ -1250,7 +1219,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
         loadOneDToVector(os, inputIdx.second, inputIdx.first, op);
     if (isLoadType()) {
       auto inputBase =
-          hasMask(op) ? op->opAttr & NoMaskedOff ? opInputs[1] : opInputs[2]
+          hasMask(op) ? opInputs[1]
           : hasTU(op) ? opInputs[1]
                       : opInputs[0];
       ret.push_back(inputBase.first);
@@ -1299,8 +1268,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
     if (hasMask(op)) {
       auto inputM = opInputs[0]; // mask
       ret.push_back(loadOneDToVector(os, inputM.second, inputM.first, op));
-      if (isLoadType() &&
-          !(op->opAttr & NoMaskedOff)) { // tama doesn't have maskedoff
+      if (isLoadType()) { // tama doesn't have maskedoff
         auto inputMO = opInputs[1];      // maskedoff
         ret.push_back(loadOneDToVector(os, inputMO.second, inputMO.first, op));
       }
@@ -1311,11 +1279,11 @@ struct CodeGenForLoadStore : CodeGenForOperator {
 
     if (isLoadType()) {
       auto inputBase =
-          hasMask(op) ? op->opAttr & NoMaskedOff ? opInputs[1] : opInputs[2]
+          hasMask(op) ? opInputs[1]
           : hasTU(op) ? opInputs[1]
                       : opInputs[0];
       auto inputStride =
-          hasMask(op) ? op->opAttr & NoMaskedOff ? opInputs[2] : opInputs[3]
+          hasMask(op) ? opInputs[2]
           : hasTU(op) ? opInputs[2]
                       : opInputs[1];
       ret.push_back(inputBase.first);
@@ -1354,12 +1322,12 @@ struct CodeGenForLoadStore : CodeGenForOperator {
     int skipBaseAddress = -1;
     int increaseBaseAddressByStrideVlen = -1;
     if (type == Lxei)
-      skipBaseAddress = hasMask(op) ? op->opAttr & NoMaskedOff ? 1 : 2
+      skipBaseAddress = hasMask(op) ? 1
                         : hasTU(op) ? 1
                                     : 0;
     if (type == Lse) {
       increaseBaseAddressByStrideVlen = hasMask(op)
-                                            ? op->opAttr & NoMaskedOff ? 1 : 2
+                                            ? 1
                                         : hasTU(op) ? 1
                                                     : 0;
     }
@@ -1370,9 +1338,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
       std::string &rawID = input.first;
       ValueBase *value = input.second;
       if (i == increaseBaseAddressByStrideVlen) {
-        auto strideID = hasMask(op) ? op->opAttr & NoMaskedOff
-                                          ? opInputs[2].first
-                                          : opInputs[3].first
+        auto strideID = hasMask(op) ? opInputs[2].first
                         : hasTU(op) ? opInputs[2].first
                                     : opInputs[1].first;
         os << rawID << " += vl * " << strideID << ";\n";
@@ -1409,7 +1375,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
 
     if (type == Lse) { // strided load
       auto inputStride =
-          hasMask(op) ? op->opAttr & NoMaskedOff ? opInputs[2] : opInputs[3]
+          hasMask(op) ? opInputs[2]
           : hasTU(op) ? opInputs[2]
                       : opInputs[1];
       auto strideID = inputStride.first;
@@ -1418,7 +1384,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
       auto stride = *static_cast<ScalarIntXLenVal *>(inputStride.second)->ptr;
       if (stride < 0) {
         auto inputBase =
-            hasMask(op) ? op->opAttr & NoMaskedOff ? opInputs[1] : opInputs[2]
+            hasMask(op) ? opInputs[1]
             : hasTU(op) ? opInputs[1]
                         : opInputs[0];
         auto baseAddr = inputBase.first;
@@ -1480,7 +1446,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
         os << "else {}\n";
       } else if (type == Lse) {
         auto inputStride =
-            hasMask(op) ? op->opAttr & NoMaskedOff ? opInputs[2] : opInputs[3]
+            hasMask(op) ? opInputs[2]
             : hasTU(op) ? opInputs[2]
                         : opInputs[1];
         auto stride = inputStride.second;
@@ -1525,7 +1491,7 @@ struct CodeGenForLoadStore : CodeGenForOperator {
       incrementRawPointerByVLEN();
       if (type == Lse) {
         std::string strideID =
-            hasMask(op)   ? op->opAttr & NoMaskedOff ? args[2] : args[3]
+            hasMask(op)   ? args[2]
               : (hasTU(op)) ? args[2]
                           : args[1];
         os << tripCounter << " += vl * " << strideID << ";\n";

@@ -697,6 +697,7 @@ inline float64_t f64(uint64_t v) { return {v}; }
 #define VI_VFP_VV_LOOP_REDUCTION(BODY16, BODY32, BODY64)                       \
   RIF::RawDatumOperand vs2(dataA[i]);                                          \
   RIF::RawDatumOperand vd_0(*dataOut);                                         \
+  softfloat_roundingMode = p->VU.get_fround_mode();                            \
   switch (sew) {                                                               \
   case e16: {                                                                  \
     BODY16;                                                                    \

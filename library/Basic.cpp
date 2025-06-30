@@ -100,29 +100,22 @@ bool hasNonmask(const OperatorBase *op) {
   return op->opAttr & NonmaskedOperation;
 }
 
-bool hasTA(const OperatorBase *op) { return op->opAttr & TailAgnostic; }
 
 bool hasTU(const OperatorBase *op) { return op->opAttr & TailUndisturbed; }
 
-bool hasMA(const OperatorBase *op) { return op->opAttr & MaskAgnostic; }
-
 bool hasMU(const OperatorBase *op) { return op->opAttr & MaskUndisturbed; }
 
-bool hasTAMA(const OperatorBase *op) { return hasTA(op) && hasMA(op); }
-
-bool hasTAMU(const OperatorBase *op) { return hasTA(op) && hasMU(op); }
-
-bool hasTUMA(const OperatorBase *op) { return hasTU(op) && hasMA(op); }
+bool hasTUM(const OperatorBase *op) { return hasTUM(op); }
 
 bool hasTUMU(const OperatorBase *op) { return hasTU(op) && hasMU(op); }
 
 bool isExplicitPolicy(OperatorBase *op) {
-  return hasTA(op) || hasTU(op) || hasMA(op) || hasMU(op);
+  return hasTU(op) || hasMU(op);
 }
 
-bool haveTailPolicy(OperatorBase *op) { return hasTA(op) || hasTU(op); }
+bool haveTailPolicy(OperatorBase *op) { return hasTU(op); }
 
-bool haveMaskPolicy(OperatorBase *op) { return hasMA(op) || hasMU(op); }
+bool haveMaskPolicy(OperatorBase *op) { return hasMU(op); }
 
 ValueBase *getVd(OperatorBase *op) { return op->outputs[0]; }
 
@@ -131,22 +124,6 @@ ValueBase *getMask(OperatorBase *op) {
   if (hasMask(op))
     mask = op->inputs[0];
   return mask;
-}
-
-ValueBase *getMaskedoff(OperatorBase *op) {
-  ValueBase *maskedoff = nullptr;
-  if (hasMask(op)) {
-    if (op->opAttr & ReductionOperation && !hasTU(op))
-      maskedoff = nullptr;
-    else if (op->opAttr & NoMaskedOff)
-      maskedoff = nullptr;
-    else
-      maskedoff = op->inputs[1];
-  } else if (op->opAttr & MulAddOperation)
-    maskedoff = op->inputs[0];
-  else if (hasTU(op))
-    maskedoff = op->inputs[0];
-  return maskedoff;
 }
 
 ValueBase *getVs2(OperatorBase *op) {
@@ -215,7 +192,7 @@ ValueBase *getVs1(OperatorBase *op) {
       vs1 = hasTU(op) ? op->inputs[3] : op->inputs[2];
     } else
       vs1 = hasMask(op)
-                ? (op->opAttr & NoMaskedOff ? op->inputs[2] : op->inputs[3])
+                ?  op->inputs[2]
             : hasTU(op) ? op->inputs[2]
                         : op->inputs[1];
   }
@@ -224,10 +201,6 @@ ValueBase *getVs1(OperatorBase *op) {
 
 bool isMaskOfOperator(OperatorBase *op, ValueBase *value) {
   return getMask(op) == value;
-}
-
-bool isMaskedoffOfOperator(OperatorBase *op, ValueBase *value) {
-  return getMaskedoff(op) == value;
 }
 
 bool isVs2OfOperator(OperatorBase *op, ValueBase *value) {

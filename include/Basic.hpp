@@ -132,16 +132,22 @@ enum OperatorAttr : OperatorAttrT {
   VoidOperation = 1 << 11,
   WideningOperation = 1 << 12,
   NarrowingOperation = 1 << 13,
-  NoMaskedOff = 1 << 14,
-  ExtensionOperation = 1 << 15,
-  TailAgnostic = 1 << 16,
-  TailUndisturbed = 1 << 17,
-  MaskAgnostic = 1 << 18,
-  MaskUndisturbed = 1 << 19,
-  AddWithCarry = 1 << 20,
-  VXRM = 1 << 21,
-  FRM = 1 << 22,
-  CONVERT = 1 << 23,
+  ExtensionOperation = 1 << 14,
+  TailUndisturbed = 1 << 15,
+  MaskUndisturbed = 1 << 16,
+  AddWithCarry = 1 << 17,
+  VXRM = 1 << 18,
+  FRM = 1 << 19,
+  CONVERT = 1 << 20,
+  vxrm0 = 1 << 21,
+  vxrm1 = 1 << 22,
+  vxrm2 = 1 << 23,
+  vxrm3 = 1 << 24,
+  frm0 = 1 << 25,
+  frm1 = 1 << 26,
+  frm2 = 1 << 27,
+  frm3 = 1 << 28,
+  frm4 = 1 << 29,
 };
 
 struct OperatorBase : ValueBase {
@@ -216,20 +222,15 @@ struct OperatorBase : ValueBase {
 // Utility (sugar) functions for readability
 bool hasMask(const OperatorBase *op);
 bool hasNonmask(const OperatorBase *op);
-bool hasTA(const OperatorBase *op);
 bool hasTU(const OperatorBase *op);
-bool hasMA(const OperatorBase *op);
 bool hasMU(const OperatorBase *op);
-bool hasTAMA(const OperatorBase *op);
-bool hasTAMU(const OperatorBase *op);
-bool hasTUMA(const OperatorBase *op);
+bool hasTUM(const OperatorBase *op);
 bool hasTUMU(const OperatorBase *op);
 bool isExplicitPolicy(OperatorBase *op);
 bool haveTailPolicy(OperatorBase *op);
 bool haveMaskPolicy(OperatorBase *op);
 
 bool isMaskOfOperator(OperatorBase *op, ValueBase *value);
-bool isMaskedoffOfOperator(OperatorBase *op, ValueBase *value);
 bool isVs2OfOperator(OperatorBase *op, ValueBase *value);
 bool isVs1OfOperator(OperatorBase *op, ValueBase *value);
 bool isExistVs1Rs1(OperatorBase *op);
@@ -241,7 +242,6 @@ bool isNarrowingValue(ValueBase *x, ValueBase *y); // is X Narrow of Y
 // Getters for input/output of an Operator
 ValueBase *getVd(OperatorBase *op);
 ValueBase *getMask(OperatorBase *op);
-ValueBase *getMaskedoff(OperatorBase *op);
 ValueBase *getVs2(OperatorBase *op);
 ValueBase *getVs1(OperatorBase *op);
 ValueBase *getRoundingMode(OperatorBase *op);

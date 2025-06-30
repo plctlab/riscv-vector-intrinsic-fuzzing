@@ -52,12 +52,10 @@ void incrementRawPointerByVLEN(std::ostream &os, std::string ptrID);
 // Utility to get input / output of operator
 ValueBase *getVd(OperatorBase *op);
 ValueBase *getMask(OperatorBase *op);
-ValueBase *getMaskedoff(OperatorBase *op);
 ValueBase *getVs2(OperatorBase *op);
 bool isExistVs1Rs1(OperatorBase *op);
 ValueBase *getVs1(OperatorBase *op);
 bool isMaskOfOperator(OperatorBase *op, ValueBase *value);
-bool isMaskedoffOfOperator(OperatorBase *op, ValueBase *value);
 bool isVs2OfOperator(OperatorBase *op, ValueBase *value);
 bool isVs1OfOperator(OperatorBase *op, ValueBase *value);
 bool isWideningOperator(OperatorBase *op);
