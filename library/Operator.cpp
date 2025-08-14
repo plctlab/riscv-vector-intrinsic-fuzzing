@@ -1837,6 +1837,12 @@ void emitOneDVerificationCode<OneDFloat16Val>(std::ostream &os,
   os << "for (int i=0; i<" << length << ";++i){\n";
   os << "converter.u16 = tmp[i];\n";
   os << "converter2.f16 = " << output->id << "[i];\n";
+  os << "printf(\"rif:converter.f16 = \%f, intrinsic:converter2.f16 = \%f\\n\", "
+        "(double)converter.f16, (double)converter2.f16);\n";
+  os << "printf(\"rif:converter.u16 = \%u, intrinsic:converter2.u16 = \%u\\n\", "
+        "converter.u16, converter2.u16);\n";
+  os << "printf(\"rif:converter.u16 = \%x, intrinsic:converter2.u16 = \%x\\n\", "
+        "converter.u16, converter2.u16);\n";
   os << "if(converter.f16 != converter2.f16 && !(isNaNF16UI(converter.u16) && "
         "isNaNF16UI(converter2.u16))) {\n";
   os << "return 0;\n}\n";
@@ -1863,6 +1869,12 @@ void emitOneDVerificationCode<OneDFloat32Val>(std::ostream &os,
   os << "for (int i=0; i<" << length << ";++i){\n";
   os << "converter.u32 = tmp[i];\n";
   os << "converter2.f32 = " << output->id << "[i];\n";
+  os << "printf(\"rif:converter.f32 = \%f, intrinsic:converter2.f32 = \%f\\n\", "
+        "(double)converter.f32, (double)converter2.f32);\n";
+  os << "printf(\"rif:converter.u32 = \%u, intrinsic:converter2.u32 = \%u\\n\", "
+        "converter.u32, converter2.u32);\n";
+  os << "printf(\"rif:converter.u32 = \%x, intrinsic:converter2.u32 = \%x\\n\", "
+        "converter.u32, converter2.u32);\n";
   os << "if(converter.f32 != converter2.f32 && !(isNaNF32UI(converter.u32) && "
         "isNaNF32UI(converter2.u32))) {\n";
   os << "return 0;\n}\n";
@@ -1889,6 +1901,12 @@ void emitOneDVerificationCode<OneDFloat64Val>(std::ostream &os,
   os << "for (int i=0; i<" << length << ";++i){\n";
   os << "converter.u64 = tmp[i];\n";
   os << "converter2.f64 = " << output->id << "[i];\n";
+  os << "printf(\"rif:converter.f64 = \%f, intrinsic:converter2.f64 = \%f\\n\", "
+        "(double)converter.f64, (double)converter2.f64);\n";
+  os << "printf(\"rif:converter.u64 = \%u, intrinsic:converter2.u64 = \%u\\n\", "
+        "converter.u64, converter2.u64);\n";
+  os << "printf(\"rif:converter.u64 = \%x, intrinsic:converter2.u64 = \%x\\n\", "
+        "converter.u64, converter2.u64);\n";
   os << "if(converter.f64 != converter2.f64 && !(isNaNF64UI(converter.u64) && "
         "isNaNF64UI(converter2.u64))) {\n";
   os << "return 0;\n}\n";
