@@ -302,6 +302,13 @@ void Graph::generateCCode(std::ostream &os, uint32_t seed) {
     os << op->getNameWithType() << "();\n";
   }
 
+  // return 1 if any there is any failure in the operator
+  os << "int ret = 1; // 1 = success\n";
+  for (auto id : ordering) {
+    auto op = operatorLUT[id];
+    os << "ret &= golden_" << op->getNameWithType() << "();\n";
+  }
+
   // verify
   for (auto id : ordering) {
     auto op = operatorLUT[id];
@@ -313,12 +320,6 @@ void Graph::generateCCode(std::ostream &os, uint32_t seed) {
        << "() ? \"pass\" : \"fail\");\n";
   }
 
-  // return 1 if any there is any failure in the operator
-  os << "int ret = 1; // 1 = success\n";
-  for (auto id : ordering) {
-    auto op = operatorLUT[id];
-    os << "ret &= golden_" << op->getNameWithType() << "();\n";
-  }
   os << "if (!ret) return 1;\n";
 
   // end of main function

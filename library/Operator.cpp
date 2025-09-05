@@ -1903,9 +1903,9 @@ void emitOneDVerificationCode<OneDFloat64Val>(std::ostream &os,
   os << "converter2.f64 = " << output->id << "[i];\n";
   os << "printf(\"rif:converter.f64 = \%f, intrinsic:converter2.f64 = \%f\\n\", "
         "(double)converter.f64, (double)converter2.f64);\n";
-  os << "printf(\"rif:converter.u64 = \%u, intrinsic:converter2.u64 = \%u\\n\", "
+  os << "printf(\"rif:converter.u64 = \%lu, intrinsic:converter2.u64 = \%lu\\n\", "
         "converter.u64, converter2.u64);\n";
-  os << "printf(\"rif:converter.u64 = \%x, intrinsic:converter2.u64 = \%x\\n\", "
+  os << "printf(\"rif:converter.u64 = \%lx, intrinsic:converter2.u64 = \%lx\\n\", "
         "converter.u64, converter2.u64);\n";
   os << "if(converter.f64 != converter2.f64 && !(isNaNF64UI(converter.u64) && "
         "isNaNF64UI(converter2.u64))) {\n";
