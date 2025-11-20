@@ -148,6 +148,7 @@ enum OperatorAttr : OperatorAttrT {
   frm2 = 1 << 27,
   frm3 = 1 << 28,
   frm4 = 1 << 29,
+  Gather = 1 << 30,
 };
 
 struct OperatorBase : ValueBase {

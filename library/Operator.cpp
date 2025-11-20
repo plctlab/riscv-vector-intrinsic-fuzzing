@@ -312,8 +312,9 @@ static void setVL(std::ostream &os, const std::string &counter,
     int booleanLmul = getBooleanLmul(typeInfo);
     std::string lmulStr = LMUL_STR(static_cast<LmulType>(booleanLmul));
     os << "vl = __riscv_vsetvl_e8" << lmulStr << "(" << counter << ");\n";
-  } else
+  } else {
     os << "vl = " << typeInfo.setvlTypeName << "(" << counter << ");\n";
+    }
 }
 
 std::string loadOneDToVector(std::ostream &os, ValueBase *value,
@@ -628,11 +629,25 @@ void CodeGenForOperator::storeResult(std::string opResult) {
   storeVectorToOneD(os, opOutput.first, opResult, opOutput.second);
 }
 
+void CodeGenForOperator::getVlenb(std::ostream &os) {
+  os << "uint64_t vlenb;\n";
+  os << "asm volatile(\"csrr %0, vlenb\" : \"=r\"(vlenb));\n";
+}
+
 std::string CodeGenForOperator::getCounter(std::ostream &os, size_t length) {
   std::string counter = getNewPlaceholderName();
   os << "int " << counter << " = " << length << ";\n";
   os << "\n";
   return counter;
+}
+
+void CodeGenForOperator::setVLMax(std::ostream &os, size_t length) {
+  std::string counter = "placeholder" + std::to_string(--placeholderIndex);
+  os << "size_t vlmax = vlenb * 8 / " << vlTypeInfo.sew.to_string() << ";\n";
+  os << "if (vlmax < " << length << ") {\n";
+  os << "  " << counter << " = vlmax;\n";
+  os << "} else {\n";
+  os << counter << " = " << length << ";}\n";
 }
 
 void CodeGenForOperator::getLoopStart(std::ostream &os, std::string counter) {
@@ -650,8 +665,13 @@ void CodeGenForOperator::generateSingleOperatorCode() {
   getRawPointers(op->inputs, output);
   os << "\n";
 
+  if (op->opAttr & Gather)
+    CodeGenForOperator::getVlenb(os);
   std::string counter = CodeGenForOperator::getCounter(os, loopLength);
-    if (hasMask(op) && op->opAttr & FRM) {
+  if (op->opAttr & Gather)
+    CodeGenForOperator::setVLMax(os, loopLength);
+
+  if (hasMask(op) && op->opAttr & FRM || op->opAttr & Gather) {
       os << "memset(" << output->id << ", 0xff, sizeof(" << output->id
          << "));\n";}
   CodeGenForOperator::getLoopStart(os, counter);

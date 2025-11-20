@@ -8,9 +8,35 @@ vx_literal_nonmask_body = '''
   auto dataA = getRawPointer(a);
   auto dataB = getRawPointer(b);
   auto dataOut = getRawPointer(c);
+  auto RS1 = *dataB; // for vrgather.vx
 
   auto sew = op->typeInfo->sew.to_int();
   P.VU.vsew = sew;
+  P.VU.vlmax =  length * P.VU.vlmul;
+
+  for (int i = 0; i < length; ++i) {
+'''
+
+vx_literal_nonmask_gather_body = '''
+  assert(a->length == c->length && b->length == 1);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataB = getRawPointer(b);
+  auto dataOut = getRawPointer(c);
+  auto RS1 = *dataB; // for vrgather.vx
+
+  auto sew = op->typeInfo->sew.to_int();
+  P.VU.vsew = sew;
+  P.VU.vlmax = P.VU.VLEN * P.VU.vlmul / sew;
+
+  for (int i = 0; i < length; ++i) {
+    memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+  }
+
+  if (P.VU.vlmax < length)
+    length = P.VU.vlmax;
 
   for (int i = 0; i < length; ++i) {
 '''
@@ -318,6 +344,7 @@ vx_ta_literal_nonmask_destructive_end = '''
 '''
 
 vx_literal_mask_body = '''
+// script/VXLiteral.py vx_literal_mask_body\n
   assert(a->length == b->length && a->length == d->length && c->length == 1);
 
   auto length = a->length;
@@ -329,6 +356,34 @@ vx_literal_mask_body = '''
 
   auto sew = op->typeInfo->sew.to_int();
   P.VU.vsew = sew;
+
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
+vx_literal_mask_gather_body = '''
+// script/VXLiteral.py vx_literal_mask_body\n
+  assert(a->length == b->length && a->length == d->length && c->length == 1);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
+
+  auto sew = op->typeInfo->sew.to_int();
+  P.VU.vsew = sew;
+
+  P.VU.vlmax = P.VU.VLEN * P.VU.vlmul / sew;
+  auto RS1 = *dataB; // for vrgather.vx
+
+  for (int i = 0; i < length; ++i) {
+    memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+  }
+
+  if (P.VU.vlmax < length)
+    length = P.VU.vlmax;
 
   for (int i = 0; i < length; ++i) {
     if (dataM[i]) {
@@ -951,6 +1006,8 @@ def create_vx_op(op_type, op_id, sew, op_attr, output_type, input_num, input_nfi
       elif "frm4" in op_attr :
         frm = 4
       ret += vx_literal_masked_frm_body.format(frm) + mask_loop_start +include_literal("v" + op_id + ".h") + vx_literal_mask_end
+    elif "Gather" in op_attr :
+      ret += vx_literal_mask_gather_body + include_literal("v" + op_id + ".h") + vx_literal_mask_end
     elif "TailAgnostic" in op_attr and "MaskUndisturbed" in op_attr : # tamu
       ret += vx_literal_mask_body + include_literal("v" + op_id + ".h") + vx_tamu_literal_mask_end
     elif "TailUndisturbed" in op_attr and "MaskAgnostic" in op_attr : # tuma
@@ -987,6 +1044,8 @@ def create_vx_op(op_type, op_id, sew, op_attr, output_type, input_num, input_nfi
       elif "frm4" in op_attr :
         frm = 4
       ret += vx_literal_nonmask_destructive_body_frm.format(frm) +vx_literal_nonmask_destructive_body_frm_macro + loop_start +include_literal("v" + op_id + ".h") + vx_literal_nonmask_end
+    elif "Gather" in op_attr :
+      ret += vx_literal_nonmask_gather_body + include_literal("v" + op_id + ".h") + vx_literal_nonmask_end
     elif "TailAgnostic" in op_attr :
       ret += vx_literal_nonmask_body + include_literal("v" + op_id + ".h") + vx_ta_literal_nonmask_end
     else :

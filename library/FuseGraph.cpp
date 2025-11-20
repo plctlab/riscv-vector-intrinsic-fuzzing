@@ -1,5 +1,6 @@
 #include "FuseGraph.hpp"
 #include "Basic.hpp"
+#include "Operator.hpp"
 
 #include <queue>
 

@@ -12,6 +12,7 @@ extern uint_fast8_t softfloat_roundingMode;
 #endif
 
 extern uint_fast8_t softfloat_roundingMode;
+typedef uint64_t reg_t;
 
 enum VRM {
   RNU = 0, // round-to-nearest-up
@@ -46,7 +47,11 @@ enum FloatRM {
 struct Processor {
   struct VectorUnit {
     unsigned vsew;      // sew
+    unsigned vlmul = 1;    // lmul, set to 1 as default
+    unsigned vflmul = 1;   // flmul, set to 1 as default
     VRM xrm = VRM::RNU; // rounding mode
+    uint64_t VLEN = 128;  // set cpu VLEN = 128, can be modified later
+    uint64_t vlmax;
     VRM get_vround_mode() { return xrm; }
     VRM set_vround_mode(int mode) {
       if (mode >= RNU && mode < INVALID_RM)
@@ -66,6 +71,12 @@ struct Processor {
         softfloat_roundingMode = INVALID_FRM;
       }
       return softfloat_roundingMode;
+    }
+
+    // vector element for various SEW
+    template <class T> T& elt(void* vReg, uint64_t n, bool is_write = false) {
+      T* vRegPtr = reinterpret_cast<T*>(vReg);
+      return vRegPtr[n];
     }
   };
   VectorUnit VU;
