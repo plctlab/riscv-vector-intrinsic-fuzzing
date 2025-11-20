@@ -97,9 +97,11 @@ struct CodeGenForOperator {
   // Save the results of the operator into raw data slots.
   void storeResult(std::string opResult);
   static std::string getCounter(std::ostream &os, size_t length);
+  static void getVlenb(std::ostream &os);
   static void getLoopStart(std::ostream &os, std::string counter);
   static void getLoopEnd(std::ostream &os);
   void getVL(std::string counter);
+  void setVLMax(std::ostream &os, size_t length);
 
   void generateSingleOperatorCode();
 };

@@ -448,6 +448,57 @@ vv_literal_mask_body = '''
     if (dataM[i]) {
 '''
 
+vv_literal_mask_gather_body = '''
+  // scripts/VVLiteral.py vv_literal_mask_gather_body
+  assert(a->length == b->length && a->length == c->length && a->length == d->length);
+
+  auto length = a->length;
+
+  auto dataM = getRawPointer(a);
+  auto dataA = getRawPointer(b);
+  auto dataB = getRawPointer(c);
+  auto dataOut = getRawPointer(d);
+
+  auto sew = op->typeInfo->sew.to_int();
+  auto dataASew = c->typeInfo->sew.to_int(); // for index load / store only
+  P.VU.vsew = sew;
+
+  P.VU.vlmax = P.VU.VLEN * P.VU.vlmul / sew;
+
+  for (int i = 0; i < length; ++i) {
+    memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+  }
+
+  if (P.VU.vlmax < length)
+    length = P.VU.vlmax;
+  for (int i = 0; i < length; ++i) {
+    if (dataM[i]) {
+'''
+
+vv_literal_gather_body = '''
+  // scripts/VVLiteral.py vv_literal_gather_body
+  assert(a->length == b->length && a->length == c->length);
+
+  auto length = a->length;
+
+  auto dataA = getRawPointer(a);
+  auto dataB = getRawPointer(b);
+  auto dataOut = getRawPointer(c);
+
+  auto sew = op->typeInfo->sew.to_int();
+  auto dataASew = a->typeInfo->sew.to_int(); // for index load / store only
+  P.VU.vsew = sew;
+  P.VU.vlmax = P.VU.VLEN * P.VU.vlmul / sew;
+
+  for (int i = 0; i < length; ++i) {
+    memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+  }
+
+  if (P.VU.vlmax < length)
+    length = P.VU.vlmax;
+  for (int i = 0; i < length; ++i) {
+'''
+
 vv_literal_mask_body_destructive = '''
   assert(a->length == b->length && a->length == c->length && a->length == d->length && b->length == e->length);
 
@@ -583,6 +634,19 @@ vv_literal_mask_end = '''
     }else {
       memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
     }
+  }
+}
+'''
+
+vv_literal_mask_gather_end = '''
+    }else {
+      memset(&dataOut[i], 0xff, sizeof(dataOut[i]));
+    }
+  }
+}
+'''
+
+vv_literal_gather_end = '''
   }
 }
 '''
@@ -886,6 +950,8 @@ def create_vv_op(op_type, op_id, sew, op_attr, output_type, input_num, input_nfi
       elif "frm4" in op_attr :
         frm = 4
       ret += vv_literal_masked_no_maskedoff_frm_widen_body.format(frm) + vv_literal_masked_no_maskedoff_frm_widen_body_macro + include_literal("v" + op_id + ".h") + vv_literal_mask_frm_widen_end
+    elif "Gather" in op_attr :
+      ret += vv_literal_mask_gather_body + include_literal("v" + op_id + ".h") + vv_literal_mask_gather_end
     elif "TailAgnostic" in op_attr and "MaskUndisturbed" in op_attr : # tamu
       ret += vv_literal_mask_body + include_literal("v" + op_id + ".h") + vv_tamu_literal_mask_end
     elif "TailUndisturbed" in op_attr and "MaskAgnostic" in op_attr : # tuma
@@ -924,6 +990,8 @@ def create_vv_op(op_type, op_id, sew, op_attr, output_type, input_num, input_nfi
         elif "frm4" in op_attr :
           frm = 4
         ret += vv_literal_nonmask_frm_body.format(frm) + vv_literal_nonmask_frm_body_macro + include_literal("v" + op_id + ".h") + vv_literal_nonmask_frm_end
+    elif "Gather" in op_attr :
+      ret += vv_literal_gather_body + include_literal("v" + op_id + ".h") + vv_literal_gather_end
     else :
       ret += vv_literal_nonmask_body + include_literal("v" + op_id + ".h") + vv_literal_nonmask_end
   return ret
